@@ -1,2 +1,5 @@
-# temperature-network
-Pico-based temperature sensor network employing gossip and CRDTs
+# Temperature Network
+
+Pico-based temperature sensor network employing gossip and CRDTs. 
+
+
