@@ -9,30 +9,10 @@ ruleset io.picolabs.wovyn.emitter {
 
     use module io.picolabs.wrangler alias wrangler
     
-    
     shares schedule, heartbeat_period, operating_state
   }
 
   global {
-    __testing = {"queries": [{"name": "schedule"},
-                             {"name": "heartbeat_period"},
-                             {"name": "operating_state"},
-                            ],
-                 "events":  [ {"domain": "emitter",
-                               "name": "new_sensor_reading",
-                               "attrs": []
-                              },
-                              {"domain": "emitter",
-                               "name": "new_heartbeat_period",
-                               "attrs": ["heartbeat_period"]
-                              },
-                              {"domain": "emitter",
-                               "name": "new_state",
-                               "attrs": ["pause"]
-                              },
-                            ]
-                };
-
 
     schedule = function(){schedule:list()};
 
@@ -40,7 +20,7 @@ ruleset io.picolabs.wovyn.emitter {
 
     operating_state = function(){ent:emitter_state};
 
-    default_heartbeat_period = 120; //seconds
+    default_heartbeat_period = 300; //seconds
 
   }
 
