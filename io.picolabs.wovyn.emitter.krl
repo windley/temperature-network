@@ -132,11 +132,6 @@ ruleset io.picolabs.wovyn.emitter {
                .defaultsTo(event:attr("heartbeat_period") || default_heartbeat_period)
                .klog("Heartbeat period: "); // in seconds
 
-      initial_thresholds = {
-            "threshold_type" : "temperature",
-            "upper_limit": 85,
-            "lower_limit": 50
-            };
     }
     if ( ent:heartbeat_period.isnull() ) then send_directive("Initializing sensor pico");
     fired {
@@ -144,7 +139,7 @@ ruleset io.picolabs.wovyn.emitter {
       ent:emitter_state := "running";
       
       schedule emitter event "new_sensor_reading" repeat << */#{period} * * * * * >>  attributes { }
-      raise wovyn event "new_threshold" attributes initial_thresholds
+
     }
   }
 
