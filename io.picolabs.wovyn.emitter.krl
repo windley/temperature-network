@@ -138,7 +138,7 @@ ruleset io.picolabs.wovyn.emitter {
             "lower_limit": 50
             };
     }
-    if ( ent:thresholds.isnull() ) then send_directive("Initializing sensor pico");
+    if ( ent:heartbeat_period.isnull() ) then send_directive("Initializing sensor pico");
     fired {
       ent:heartbeat_period := period if ent:heartbeat_period.isnull();
       ent:emitter_state := "running";
