@@ -124,24 +124,39 @@ ruleset io.picolabs.wovyn.emitter {
     }
   }
 
-
   rule inialize_ruleset {
     select when wrangler ruleset_installed where event:attr("rids") >< meta:rid
     pre {
       period = ent:heartbeat_period
                .defaultsTo(event:attr("heartbeat_period") || default_heartbeat_period)
-               .klog("Heartbeat period: "); // in seconds
+               .klog("Initilizing heartbeat period: "); // in seconds
 
     }
-    if ( ent:heartbeat_period.isnull() ) then send_directive("Initializing sensor pico");
+    if ( ent:heartbeat_period.isnull() && schedule:list().length() == 0) then send_directive("Initializing sensor pico");
     fired {
       ent:heartbeat_period := period if ent:heartbeat_period.isnull();
-      ent:emitter_state := "running";
-      
-      schedule emitter event "new_sensor_reading" repeat << */#{period} * * * * * >>  attributes { }
+      ent:emitter_state := "running"if ent:emitter_state.isnull();
 
-    }
+      schedule emitter event "new_sensor_reading" repeat << */#{period} * * * * * >>  attributes { }
+    } 
   }
+  // rule inialize_ruleset {
+  //   select when wrangler ruleset_installed where event:attr("rids") >< meta:rid
+  //   pre {
+  //     period = ent:heartbeat_period
+  //              .defaultsTo(event:attr("heartbeat_period") || default_heartbeat_period)
+  //              .klog("Initilizing heartbeat period: "); // in seconds
+
+  //   }
+  //   if ( ent:heartbeat_period.isnull() ) then send_directive("Initializing sensor pico");
+  //   fired {
+  //     ent:heartbeat_period := period if ent:heartbeat_period.isnull();
+  //     ent:emitter_state := "running";
+      
+  //     schedule emitter event "new_sensor_reading" repeat << */#{period} * * * * * >>  attributes { }
+
+  //   }
+  // }
 
 
 }
