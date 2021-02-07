@@ -42,7 +42,7 @@ ruleset io.picolabs.wovyn.emitter {
 
     }
   }
-      
+ 
 
   rule raise_emitter_event {
     select when emitter new_sensor_reading
