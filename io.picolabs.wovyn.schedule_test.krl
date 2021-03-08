@@ -2,7 +2,7 @@ ruleset io.picolabs.wovyn.schedule_test {
   meta {
     name "schedule_test"
     description <<
-Testing if schdules work
+Testing if schedules work
 >>
     author "PJW"
 
