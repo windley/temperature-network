@@ -1,4 +1,4 @@
-ruleset schedule_test {
+ruleset io.picolabs.wovyn.schedule_test {
   meta {
     name "schedule_test"
     description <<
