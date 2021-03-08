@@ -9,7 +9,7 @@ ruleset io.picolabs.wovyn.emitter {
 
     use module io.picolabs.wrangler alias wrangler
     
-    shares schedule, heartbeat_period, operating_state
+    shares schedule, heartbeat_period, operating_state, my_rid
   }
 
   global {
@@ -21,6 +21,8 @@ ruleset io.picolabs.wovyn.emitter {
     operating_state = function(){ent:emitter_state};
 
     default_heartbeat_period = 300; //seconds
+
+    my_rid = function(){meta:rid};
 
   }
 
@@ -42,7 +44,6 @@ ruleset io.picolabs.wovyn.emitter {
 
     }
   }
- 
 
   rule raise_emitter_event {
     select when emitter new_sensor_reading
@@ -125,7 +126,7 @@ ruleset io.picolabs.wovyn.emitter {
   }
 
   rule inialize_ruleset {
-    select when wrangler ruleset_installed where event:attr("rids") >< meta:rid
+    select when wrangler ruleset_installed where event:attr("rid") == meta:rid
     pre {
       period = ent:heartbeat_period
                .defaultsTo(event:attr("heartbeat_period") || default_heartbeat_period)
