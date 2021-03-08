@@ -23,7 +23,7 @@ Testing if schedules work
     select when sensor gossip
     always {
       schedule sensor event "gossip"
-        at time:add(time:now().klog("Now"), {"seconds": gossip_period()}).klog("Future") setting(id);
+        at time:add(time:now(), {"seconds": gossip_period()}) setting(id);
       ent:current_gossip_schedule := id.klog("Gossip schedule ID: ");
     }
   }
