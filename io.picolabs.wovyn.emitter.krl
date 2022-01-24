@@ -126,7 +126,7 @@ ruleset io.picolabs.wovyn.emitter {
   }
 
   rule inialize_ruleset {
-    select when wrangler ruleset_installed where event:attr("rid") == meta:rid
+    select when wrangler ruleset_installed where event:attr("rids") >< meta:rid
     pre {
       period = ent:heartbeat_period
                .defaultsTo(event:attr("heartbeat_period") || default_heartbeat_period)
