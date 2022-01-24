@@ -5,7 +5,7 @@ ruleset io.picolabs.wovyn.emitter {
     name "wovyn_emitter"
     author "PJW"
     description "Simulates a Wovyn temperature sensor"
-    version "draft"
+    version "1.2"
 
     use module io.picolabs.wrangler alias wrangler
     
