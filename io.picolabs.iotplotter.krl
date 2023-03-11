@@ -19,14 +19,14 @@ ruleset io.picolabs.iotplotter {
 
     pre {
       feed_id = "367832564114515476";
-      api_key = "43cd1f69ffad26cd06d9df3fb2613e32e5e54f87ce";
+      api_key = meta:rulesetConfig{["api_key"]}.klog("key"); // "43cd1f69ffad26cd06d9df3fb2613e32e5e54f87ce";
       payload = {"data": {
                     "device_temperature": [
-                      {"value": event:attrs{["readings", "internal_temp"]},
+                      {"value": event:attrs{["readings", "internalTemp"]},
                        "epoch": event:attrs{["timestamp"]}}
                     ],
                     "probe temperature": [
-                      {"value": event:attrs{["readings", "probe_temp"]},
+                      {"value": event:attrs{["readings", "probeTemp"]},
                        "epoch": event:attrs{["timestamp"]}}
                     ],
                     "humidity": [
