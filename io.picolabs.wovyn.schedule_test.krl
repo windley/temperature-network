@@ -22,8 +22,7 @@ Testing if schedules work
   rule gossip {
     select when sensor gossip
     always {
-      schedule sensor event "gossip"
-        at time:add(time:now(), {"seconds": gossip_period()}) setting(id);
+      schedule sensor event "gossip" at time:add(time:now(), {"seconds": gossip_period()}).klog("Future: ") setting(id);
       ent:current_gossip_schedule := id.klog("Gossip schedule ID: ");
     }
   }
@@ -31,6 +30,12 @@ Testing if schedules work
   rule stop_gossiping {
     select when sensor no_gossip
     schedule:remove(ent:current_gossip_schedule);
+  }
+
+  rule clear_schedule {
+    select when sensor clear_schedule
+    foreach gossip_schedule() setting(id)
+        schedule:remove(id);
   }
 
   rule set_gossip_period {
