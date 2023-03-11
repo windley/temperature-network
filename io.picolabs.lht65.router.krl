@@ -119,6 +119,16 @@ Received and decodes heartbeat information from a Dragino LHT65
         clear ent:lastProbeTemp if (external_sensor.klog("probe type") != "Temperature")
         ent:lastHumidity := humidity
 
+      	raise lht65 event "new_readings" attributes
+         	   {"readings":  {"internalTemp": temperature,
+                            "probeTemp": external_temp,
+                            "humidity": humidity,
+                            "battery_status": battery_status,
+                            "battery_voltage": battery_voltage
+                           },
+	            "sensor_id": sensor_id,
+              "timestamp": event:attrs{["reported_at"]}
+	           };       
 
       }
   }
