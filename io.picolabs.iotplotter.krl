@@ -14,7 +14,7 @@ ruleset io.picolabs.iotplotter {
 
   }
 
-  rule send_data_to_IoTPlotter {
+  rule send_temperature_data_to_IoTPlotter {
     select when lht65 new_readings
 
     pre {
