@@ -25,7 +25,7 @@ ruleset io.picolabs.iotplotter {
                       {"value": event:attrs{["readings", "internalTemp"]},
                        "epoch": event:attrs{["timestamp"]}}
                     ],
-                    "probe temperature": [
+                    "probe_temperature": [
                       {"value": event:attrs{["readings", "probeTemp"]},
                        "epoch": event:attrs{["timestamp"]}}
                     ],
