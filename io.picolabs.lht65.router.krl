@@ -112,24 +112,27 @@ Received and decodes heartbeat information from a Dragino LHT65
         probe_connected = (not (payload_array[4] == 32767)).klog("Probe connected?")
         celsius_temp = fix_temperatures(payload_array[4]).klog("Temperature Probe (C)");
         external_temp = cToF(celsius_temp).klog("Temperature Probe (F)");
-        sensor_id = event:attrs{["uuid"]};
+
+        sensor_data = {"internalTemp": temperature,
+                       "humidity": humidity,
+                       "battery_status": battery_status,
+                       "battery_voltage": battery_voltage
+                      };
+
+        readings = {"readings":  probe_connected => sensor_data.put({"probeTemp": external_temp})
+                                                  | sensor_data,
+                    "probe_connected": probe_connected,
+	                  "sensor_id": event:attrs{["uuid"]},
+                    "timestamp": event:attrs{["reported_at"]}
+	                 }
       }
       always {
         ent:lastInternalTemp := temperature
         ent:lastProbeTemp :=  external_temp
-        clear ent:lastProbeTemp if (external_sensor.klog("probe type") != "Temperature")
+        clear ent:lastProbeTemp if not (probe_connected)
         ent:lastHumidity := humidity
 
-      	raise lht65 event "new_readings" attributes
-         	   {"readings":  {"internalTemp": temperature,
-                            "probeTemp": external_temp,
-                            "humidity": humidity,
-                            "battery_status": battery_status,
-                            "battery_voltage": battery_voltage
-                           },
-	            "sensor_id": sensor_id,
-              "timestamp": event:attrs{["reported_at"]}
-	           };       
+      	raise lht65 event "new_readings" attributes readings;       
 
       }
   }
