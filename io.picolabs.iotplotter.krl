@@ -18,7 +18,7 @@ ruleset io.picolabs.iotplotter {
     select when lht65 new_readings
 
     pre {
-      feed_id = "367832564114515476";
+      feed_id = meta:rulesetConfig{["feed_id"]} || "367832564114515476";
       api_key = meta:rulesetConfig{["api_key"]}; 
       payload = {"data": {
                     "device_temperature": [
