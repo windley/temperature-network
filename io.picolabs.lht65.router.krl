@@ -109,6 +109,7 @@ Received and decodes heartbeat information from a Dragino LHT65
         battery_status = payload_array[0].shiftRight(14).klog("Battery status")
         battery_voltage = payload_array[0].band("3FFF").klog("Battery voltage (mV)")
         external_sensor = (payload_array[3] == 1) => "Temperature" | "Something else"
+        probe_connected = (not (payload_array[4] == 32767)).klog("Probe connected?")
         celsius_temp = fix_temperatures(payload_array[4]).klog("Temperature Probe (C)");
         external_temp = cToF(celsius_temp).klog("Temperature Probe (F)");
         sensor_id = event:attrs{["uuid"]};
