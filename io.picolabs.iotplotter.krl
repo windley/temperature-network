@@ -12,6 +12,12 @@ ruleset io.picolabs.iotplotter {
 
   global {
 
+     name_map = {
+       "internalTemp": "device_temperature",
+       "probeTemp": "probe_temperature",
+       };
+       
+
   }
 
   rule send_temperature_data_to_IoTPlotter {
@@ -19,7 +25,15 @@ ruleset io.picolabs.iotplotter {
 
     pre {
       feed_id = meta:rulesetConfig{["feed_id"]};
-      api_key = meta:rulesetConfig{["api_key"]}; 
+      api_key = meta:rulesetConfig{["api_key"]};
+
+      payload_data = event:attrs{["readings"]}.map(function(reading_val){
+                         [
+                          {"value": reading_val,
+                           "epoch": event:attrs{["timestamp"]}
+                          }
+                         ]}).klog("New reading map");
+
       payload = {"data": {
                     "device_temperature": [
                       {"value": event:attrs{["readings", "internalTemp"]},
