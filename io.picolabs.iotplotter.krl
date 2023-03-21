@@ -21,7 +21,7 @@ ruleset io.picolabs.iotplotter {
                          .map(function(reading_val){
                              [
                               {"value": reading_val,
-                               "epoch": even_:attrs{["timestamp"]}
+                               "epoch": event_attrs{["timestamp"]}
                               }
                              ]})
                          .filter(function(v, k){not(remove_these >< k)}) 
