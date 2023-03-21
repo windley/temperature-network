@@ -51,5 +51,17 @@ ruleset io.picolabs.iotplotter {
     }
   }
   
+  rule send_soil_data_to_IoTPlotter {
+    select when lse01 new_readings
+
+    send_payload(meta:rulesetConfig{["feed_id"]},
+                 meta:rulesetConfig{["api_key"]},
+                 event:attrs) setting(resp)
+   
+    always {
+      response =  resp.klog("POST response");
+    }
+  }
+  
 
 }

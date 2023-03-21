@@ -119,7 +119,7 @@ Received and decodes heartbeat information from a Dragino LHT65
                        "battery_voltage": battery_voltage
                       };
 
-        readings = {"readings":  probe_connected => sensor_data.put({"external_temperature": external_temp})
+        readings = {"readings":  probe_connected => sensor_data.put({"probe_temperature": external_temp})
                                                   | sensor_data,
                     "probe_connected": probe_connected,
 	                  "sensor_id": event:attrs{["uuid"]},
