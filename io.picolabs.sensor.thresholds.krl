@@ -55,7 +55,7 @@ ruleset io.picolabs.sensor.thresholds {
 	      lower_threshold = threshold_map{["limits","lower"]}.klog("Lower threshold: ");
 	      upper_threshold = threshold_map{["limits","upper"]};
   
-	      sensor_type = event:attr{"sensor_type"}.klog("Type of sensor: ");
+	      sensor_type = event:attr("sensor_type").klog("Type of sensor: ");
 
         // decide
 	      under = reading < lower_threshold;
