@@ -29,22 +29,23 @@ ruleset io.picolabs.iotplotter {
       payload_data
     };
 
+    send_payload = defaction(feed_id, api_key, event_attrs) {
+      http:post("http://iotplotter.com/api/v2/feed/" + feed_id,
+         headers = {"api-key": api_key},
+         json = {"data": format_payload(event_attrs)}
+      ) setting(resp);
+      return resp
+    }
+
   }
 
   rule send_temperature_data_to_IoTPlotter {
     select when lht65 new_readings
 
-    pre {
-      feed_id = meta:rulesetConfig{["feed_id"]};
-      api_key = meta:rulesetConfig{["api_key"]};
- 
-    }
-
-    http:post("http://iotplotter.com/api/v2/feed/" + feed_id,
-       headers = {"api-key": api_key},
-       json = {"data": format_payload(event:attrs)}
-    ) setting(resp);
-
+    send_payload(meta:rulesetConfig{["feed_id"]},
+                 meta:rulesetConfig{["api_key"]},
+                 event:attrs) setting(resp)
+   
     always {
       response =  resp.klog("POST response");
     }
