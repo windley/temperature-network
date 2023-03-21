@@ -50,6 +50,7 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
     }
   }
 
+
   rule process_heartbeat {
       select when lse01 heartbeat
       pre {
@@ -72,6 +73,7 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
 
         readings = {"readings":  sensor_data,
 	                  "sensor_id": event:attrs{["uuid"]},
+                    "sensor_type": "dragino_lse01",
                     "timestamp": event:attrs{["reported_at"]}
 	                 }
       }
@@ -81,10 +83,12 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
         ent:lastConductivity := conductivity;
 
 
-        raise lse01 event "new_readings" attributes readings;       
+        raise lse01 event "new_readings" attributes readings;
+        raise device event "battery_status" attributes {"battery_status": battery_status,
+                                                        "battery_voltage": battery_voltage
+                                                       };
 
       }
   }
 
-  
 }

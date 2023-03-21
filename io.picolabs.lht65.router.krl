@@ -122,6 +122,7 @@ Received and decodes heartbeat information from a Dragino LHT65
         readings = {"readings":  probe_connected => sensor_data.put({"probe_temperature": external_temp})
                                                   | sensor_data,
                     "probe_connected": probe_connected,
+                    "sensor_type": "dragino_lht65",
 	                  "sensor_id": event:attrs{["uuid"]},
                     "timestamp": event:attrs{["reported_at"]}
 	                 }
@@ -133,6 +134,9 @@ Received and decodes heartbeat information from a Dragino LHT65
         ent:lastHumidity := humidity
 
       	raise lht65 event "new_readings" attributes readings;       
+        raise device event "battery_status" attributes {"battery_status": battery_status,
+                                                        "battery_voltage": battery_voltage
+                                                       };
 
       }
   }
