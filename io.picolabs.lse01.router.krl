@@ -62,22 +62,18 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
         conductivity = payload_array[4].klog("Conductivity (uS/cm)")
         battery_status = payload_array[0].shiftRight(14).klog("Battery status")
         battery_voltage = payload_array[0].band("3FFF").klog("Battery voltage (mV)")
-//        probe_connected = (not (payload_array[4] == 32767)).klog("Probe connected?")
-//        celsius_temp = fix_temperatures(payload_array[4]).klog("Temperature Probe (C)");
-//        external_temp = cToF(celsius_temp).klog("Temperature Probe (F)");
 
-        // sensor_data = {"internalTemp": temperature,
-        //                "humidity": humidity,
-        //                "battery_status": battery_status,
-        //                "battery_voltage": battery_voltage
-        //               };
+        sensor_data = {"moisture": moisture,
+                       "temperature": temperature,
+                       "conductivity": conductivity,
+                       "battery_status": battery_status,
+                       "battery_voltage": battery_voltage
+                      };
 
-        // readings = {"readings":  probe_connected => sensor_data.put({"probeTemp": external_temp})
-        //                                           | sensor_data,
-        //             "probe_connected": probe_connected,
-	      //             "sensor_id": event:attrs{["uuid"]},
-        //             "timestamp": event:attrs{["reported_at"]}
-	      //            }
+        readings = {"readings":  sensor_data,
+	                  "sensor_id": event:attrs{["uuid"]},
+                    "timestamp": event:attrs{["reported_at"]}
+	                 }
       }
       always {
         ent:lastMoisture := moisture;
@@ -85,7 +81,7 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
         ent:lastConductivity := conductivity;
 
 
-        // raise lht65 event "new_readings" attributes readings;       
+        raise lse01 event "new_readings" attributes readings;       
 
       }
   }
