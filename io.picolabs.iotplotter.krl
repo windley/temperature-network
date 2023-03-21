@@ -12,12 +12,22 @@ ruleset io.picolabs.iotplotter {
 
   global {
 
-     name_map = {
-       "internalTemp": "device_temperature",
-       "probeTemp": "probe_temperature",
-       };
 
-     remove_these = ["battery_status"];
+ 
+    // map readings into format needed by IoTPlotter, removing any items with keys in `remove_these`
+    format_payload = function(event_attrs) {
+      remove_these = ["battery_status"];
+      payload_data = event_attrs{["readings"]}
+                         .map(function(reading_val){
+                             [
+                              {"value": reading_val,
+                               "epoch": even_:attrs{["timestamp"]}
+                              }
+                             ]})
+                         .filter(function(v, k){not(remove_these >< k)}) 
+                         //.klog("New reading map");
+      payload_data
+    };
 
   }
 
@@ -27,37 +37,12 @@ ruleset io.picolabs.iotplotter {
     pre {
       feed_id = meta:rulesetConfig{["feed_id"]};
       api_key = meta:rulesetConfig{["api_key"]};
-
-      payload_data = event:attrs{["readings"]}.map(function(reading_val){
-                         [
-                          {"value": reading_val,
-                           "epoch": event:attrs{["timestamp"]}
-                          }
-                         ]}).filter(function(v, k){not(remove_these >< k)}).klog("New reading map");
-
-      payload = {"data": {
-                    "device_temperature": [
-                      {"value": event:attrs{["readings", "internalTemp"]},
-                       "epoch": event:attrs{["timestamp"]}}
-                    ],
-                    "probe_temperature": [
-                      {"value": event:attrs{["readings", "probeTemp"]},
-                       "epoch": event:attrs{["timestamp"]}}
-                    ],
-                    "humidity": [
-                      {"value": event:attrs{["readings", "humidity"]},
-                       "epoch": event:attrs{["timestamp"]}}
-                    ],
-                    "battery_voltage": [
-                      {"value": event:attrs{["readings", "battery_voltage"]},
-                       "epoch": event:attrs{["timestamp"]}}
-                    ]}
-                };
+ 
     }
 
     http:post("http://iotplotter.com/api/v2/feed/" + feed_id,
        headers = {"api-key": api_key},
-       json = {"data": payload_data}
+       json = {"data": format_payload(event:attrs)}
     ) setting(resp);
 
     always {
