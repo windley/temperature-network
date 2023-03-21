@@ -17,7 +17,7 @@ ruleset io.picolabs.iotplotter {
        "probeTemp": "probe_temperature",
        };
 
-     remove = ["battery_status"];
+     remove_these = ["battery_status"];
 
   }
 
@@ -33,7 +33,7 @@ ruleset io.picolabs.iotplotter {
                           {"value": reading_val,
                            "epoch": event:attrs{["timestamp"]}
                           }
-                         ]}).filter(function(v, k){remove >< k}).klog("New reading map");
+                         ]}).filter(function(v, k){not(remove_these >< k)}).klog("New reading map");
 
       payload = {"data": {
                     "device_temperature": [
