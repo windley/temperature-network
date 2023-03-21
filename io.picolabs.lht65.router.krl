@@ -133,10 +133,7 @@ Received and decodes heartbeat information from a Dragino LHT65
         clear ent:lastProbeTemp if not (probe_connected)
         ent:lastHumidity := humidity
 
-      	raise lht65 event "new_readings" attributes readings;       
-        raise device event "battery_status" attributes {"battery_status": battery_status,
-                                                        "battery_voltage": battery_voltage
-                                                       };
+      	raise sensor event "new_readings" attributes readings;       
 
       }
   }
