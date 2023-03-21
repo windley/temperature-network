@@ -4,7 +4,7 @@ ruleset io.picolabs.iotplotter {
     name "iot_plotter"
     author "PJW"
     description "Sends data to IotPlotter API"
-    version "draft"
+    version "0.2.0"
 
     use module io.picolabs.wrangler alias wrangler
 
