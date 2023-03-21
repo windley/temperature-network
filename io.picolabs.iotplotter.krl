@@ -57,7 +57,7 @@ ruleset io.picolabs.iotplotter {
 
     http:post("http://iotplotter.com/api/v2/feed/" + feed_id,
        headers = {"api-key": api_key},
-       json = payload
+       json = {"data": payload_data}
     ) setting(resp);
 
     always {
