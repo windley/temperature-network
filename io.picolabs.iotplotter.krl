@@ -11,8 +11,6 @@ ruleset io.picolabs.iotplotter {
   }
 
   global {
-
-
  
     // map readings into format needed by IoTPlotter, removing any items with keys in `remove_these`
     format_payload = function(event_attrs) {
