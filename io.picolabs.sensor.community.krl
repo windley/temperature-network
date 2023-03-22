@@ -37,7 +37,7 @@ ruleset io.picolabs.sensor.community {
                        "lse01": ["io.picolabs.lse01.router.krl"],
                        "all":   ["io.picolabs.sensor.thresholds.krl",
                                  "io.picolabs.iotplotter.krl",
-                                 "io.picolabs.sensor.twilio.krl",
+                                 //"io.picolabs.sensor.twilio.krl",
                                 ]
                      };
 
