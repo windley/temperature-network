@@ -82,7 +82,7 @@ ruleset io.picolabs.sensor.thresholds {
                "name": event:attr("name"),
                "sensor_id": event:attr("sensor_id"),
                "timestamp": event:attr("timestamp"),
-               "pico_name": wrangler:name,
+               "pico_name": wrangler:myself{"name"},
                "threshold": under => lower_threshold | upper_threshold,
                "message": << threshold violation: #{msg} for #{sensor_type} >>
               }	      
