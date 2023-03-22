@@ -33,11 +33,12 @@ ruleset io.picolabs.sensor.community {
       wrangler:children()
     }
 
-    rids_to_install = {"lht65": ["io.picolabs.lht65.router.krl"],
-                       "lse01": ["io.picolabs.lse01.router.krl"],
-                       "all":   ["io.picolabs.sensor.thresholds.krl",
-                                 "io.picolabs.iotplotter.krl",
-                                 //"io.picolabs.sensor.twilio.krl",
+    // don't add .krl extension
+    rids_to_install = {"lht65": ["io.picolabs.lht65.router"],
+                       "lse01": ["io.picolabs.lse01.router"],
+                       "all":   ["io.picolabs.sensor.thresholds",
+                                 "io.picolabs.iotplotter",
+                                 //"io.picolabs.sensor.twilio",
                                 ]
                      };
 
