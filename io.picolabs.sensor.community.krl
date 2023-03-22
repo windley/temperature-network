@@ -1,4 +1,4 @@
-ruleset io.picolabs.sensro.community {
+ruleset io.picolabs.sensor.community {
   meta {
 
     name "sensor_community"
@@ -16,6 +16,18 @@ ruleset io.picolabs.sensro.community {
   }
 
   global {
+
+    channels = [
+      {"tags": ["sensor"],
+       "eventPolicy": {
+         "allow": [ { "domain": "sensor", "name": "*" }, ],
+        "deny": []
+        },
+       "queryPolicy": {
+         "allow": [ { "rid": "*", "name": "*" } ],
+         "deny": []
+       }
+     }];
 
     children = function() {
       wrangler:children()
@@ -77,6 +89,20 @@ ruleset io.picolabs.sensro.community {
       }
   }
 
+  
+  rule create_channels {
+    select when wrangler ruleset_installed where event:attr("rids") >< ctx:rid
+    foreach channels setting(channel)
+      wrangler:createChannel(channel{"tags"},
+                             channel{"eventPolicy"},
+                             channel{"queryPolicy"}) setting(new_channel)
+                             
+  }
+
+  rule inialize_ruleset {
+    select when wrangler ruleset_installed where event:attr("rids") >< ctx:rid
+    noop() // nothing to do right now
+  }
 
     
 
