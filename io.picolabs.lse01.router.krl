@@ -15,7 +15,7 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
   global {
 
     channels = [
-      {"tags": ["lht65", "sensor"],
+      {"tags": ["lse01", "sensor"],
        "eventPolicy": {
          "allow": [ { "domain": "lse01", "name": "*" }, ],
         "deny": []
