@@ -1,0 +1,113 @@
+ruleset io.picolabs.sensro.community {
+  meta {
+
+    name "sensor_community"
+    author "PJW"
+    description "General rules for managing a community of Wovyn devices"
+    version "draft"
+
+    use module io.picolabs.wrangler alias wrangler
+   
+    shares
+      children,
+      temperatures
+      
+    //provides 
+  }
+
+  global {
+
+    children = function() {
+      wrangler:children()
+    }
+
+    rids_to_install = {"lht65": ["io.picolabs.lht65.router.krl"],
+                       "lse01": ["io.picolabs.lse01.router.krl"],
+                       "all":   ["io.picolabs.sensor.thresholds.krl",
+                                 "io.picolabs.iotplotter.krl",
+                                 "io.picolabs.sensor.twilio.krl",
+                                ]
+                     };
+
+
+    temperatures = function() {
+      children = wrangler:children();
+      children.map(function(child){
+                      wrangler:picoQuery(child.get("eci"),
+                                         "io.picolabs.lht65.router",
+                                         "lastTemperature")
+                      .head()
+                   });
+    };
+
+  }
+ 
+  rule new_sensor {
+    select when sensor initiation
+    pre {
+      sensor_color = (event:attr("color")|| "#ae85fa").klog("Color: ")
+      sensor_name = (event:attr("name") || "sensor_"+random:word()).klog("Name: ")
+      sensor_type = (event:attr("type") || "dht65").klog("Type: ")
+      
+      to_install = rids_to_install{"all"}.append(rids_to_install{sensor_type}.defaultsTo([]))
+      
+    }
+    send_directive("new sensor pico initiated", {"sensor_name":sensor_name})
+    always {
+      ent:sensors := ent:sensors.defaultsTo([]).union([sensor_name]);
+      raise wrangler event "new_child_request"
+        attributes { "name": sensor_name, "backgroundColor": sensor_color,
+                     "url_rids": to_install
+                   }
+    }
+  }
+
+
+
+  rule initialize_temperatures {
+    select when sensor temperature_initiation
+    foreach ctx:children setting(eci)
+      every {
+        send_directive("initializing temperatures");
+        event:send(
+          { "eci": eci, "eid": random:word(),
+            "domain": "sensor", "type": "temperature_initiation",
+          }
+        );
+      }
+  }
+
+
+    
+
+  // this won't be needed once subscriptions are installed automatically 
+  // rule install_subscription_ruleset {
+  //   select when wrangler new_child_created
+  //     event:send(
+  //       { "eci": event:attr("eci"), "eid": random:word(),
+  //         "domain": "wrangler", "type": "install_ruleset_request",
+  //         "attrs": {
+  //           "url" : "file:///usr/local/lib/node_modules/pico-engine/krl/io.picolabs.subscription.krl",
+  //           "rid": "io.picolabs.subscription", 
+  //           "config":{},
+  //         }
+  //       }
+  //    )
+  // }    
+
+  // rule sensor_initialization {
+  //   select when wrangler new_child_created
+  //   foreach rids_to_install{"all"} setting(rid)
+  //     event:send(
+  //       { "eci": event:attr("eci"), "eid": random:word(),
+  //         "domain": "wrangler", "type": "install_ruleset_request",
+  //         "attrs": {
+  //           "absoluteURL":meta:rulesetURI,
+  //           "rid":rid,
+  //           "config":{},
+  //         }
+  //       }
+  //    )
+  // }
+
+}
