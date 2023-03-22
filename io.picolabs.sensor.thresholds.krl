@@ -49,7 +49,7 @@ ruleset io.picolabs.sensor.thresholds {
     foreach event:attr("readings") setting (reading, name)
       pre {
         // thresholds
-		    threshold_map = thresholds(name).klog("Thresholds: ")
+		    threshold_map = thresholds(name)
 	      lower_threshold = threshold_map{["limits","lower"]}
 	      upper_threshold = threshold_map{["limits","upper"]}
 	    }
