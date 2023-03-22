@@ -49,11 +49,11 @@ ruleset io.picolabs.sensor.thresholds {
     foreach event:attr("readings") setting (reading, name)
       pre {
         // thresholds
-		    threshold_map = thresholds(name).klog("Thresholds: ");
-	      lower_threshold = threshold_map{["limits","lower"]}.klog("Lower threshold: ");
-	      upper_threshold = threshold_map{["limits","upper"]};
+		    threshold_map = thresholds(name).klog("Thresholds: ")
+	      lower_threshold = threshold_map{["limits","lower"]}
+	      upper_threshold = threshold_map{["limits","upper"]}
   
-	      sensor_type = event:attr("sensor_type").klog("Type of sensor: ");
+	      sensor_type = event:attr("sensor_type")
 
         // decide
 	      under = reading < lower_threshold;
