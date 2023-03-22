@@ -14,6 +14,29 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
 
   global {
 
+    channels = [
+      {"tags": ["lht65", "sensor"],
+       "eventPolicy": {
+         "allow": [ { "domain": "lse01", "name": "*" }, ],
+        "deny": []
+        },
+       "queryPolicy": {
+         "allow": [ { "rid": "*", "name": "*" } ],
+         "deny": []
+       }
+     },
+      {"tags": ["sensor"],
+       "eventPolicy": {
+         "allow": [ { "domain": "sensor", "name": "*" }, ],
+        "deny": []
+        },
+       "queryPolicy": {
+         "allow": [ { "rid": "*", "name": "*" } ],
+         "deny": []
+       }
+     }];
+
+
     cToF = function(c){c*1.8+32};
     fix_temperatures = function(x){(x < 32768 => x | x-65536)/100}; 
 
@@ -87,5 +110,21 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
 
       }
   }
+
+  rule create_channels {
+    select when wrangler ruleset_installed where event:attr("rids") >< ctx:rid
+    foreach channels setting(channel)
+      wrangler:createChannel(channel{"tags"},
+                             channel{"eventPolicy"},
+                             channel{"queryPolicy"}) setting(new_channel)
+                             
+  }
+
+  rule inialize_ruleset {
+    select when wrangler ruleset_installed where event:attr("rids") >< ctx:rid
+    noop() // nothing to do right now
+  }
+
+
 
 }
