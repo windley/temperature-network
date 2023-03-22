@@ -61,7 +61,7 @@ ruleset io.picolabs.sensor.community {
       sensor_color = (event:attr("color")|| "#ae85fa").klog("Color: ")
       sensor_name = (event:attr("name") || "sensor_"+random:word()).klog("Name: ")
       sensor_type = (event:attr("type") || "dht65").klog("Type: ")
-      to_install = rids_to_install{"all"}.append(rids_to_install{event:attr(sensor_type)}.defaultsTo([]));
+      to_install = rids_to_install{"all"}.append(rids_to_install{sensor_type}.defaultsTo([]));
     }
     send_directive("new sensor pico initiated", {"sensor_name":sensor_name})
     always {
