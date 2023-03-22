@@ -48,8 +48,6 @@ ruleset io.picolabs.sensor.thresholds {
 
     foreach event:attr("readings") setting (reading, name)
       pre {
-
-
         // thresholds
 		    threshold_map = thresholds(name).klog("Thresholds: ");
 	      lower_threshold = threshold_map{["limits","lower"]}.klog("Lower threshold: ");
@@ -64,7 +62,7 @@ ruleset io.picolabs.sensor.thresholds {
 	          | over  => << #{name} is over threshold of #{upper_threshold}>>
 	          |          << #{name} is between #{lower_threshold} and #{upper_threshold}>>;
       }
-      if(  under || over ) then noop();
+      if(  (under || over) && not threshold_map.isnull() ) then noop();
       fired {
             log warn << threshold: #{msg} for #{sensor_type} >>;
 	          raise sensor event "threshold_violation" attributes
@@ -74,14 +72,15 @@ ruleset io.picolabs.sensor.thresholds {
 	             "threshold": under => lower_threshold | upper_threshold,
 	             "message": << threshold violation: #{msg} for #{sensor_type} >>
 	            }	      
-     } else { 
-            log info << threshold: #{msg} for #{sensor_type} >>;
+     } else {
+            // this is ugly. 
+            log info << threshold: #{msg} for #{sensor_type} >>  if not threshold_map.isnull();
             raise sensor event "within_threshold" attributes
   	          {"reading": reading,
  	             "sensor_id": event:attr("sensor_id"),
                "timestamp": event:attr("timestamp"),
 		           "message": << within threshold: #{msg} for #{sensor_type} >>
-	            }	      
+	            }	if  not threshold_map.isnull();
      }
   }
   
