@@ -67,7 +67,7 @@ ruleset io.picolabs.sensor.thresholds {
       }
     }
 
-    rule signal_violation {
+    rule check_violation {
       select when sensor threshold_exists
       pre {
         // decide
