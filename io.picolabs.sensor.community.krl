@@ -60,18 +60,32 @@ ruleset io.picolabs.sensor.community {
       sensor_color = (event:attr("color")|| "#ae85fa").klog("Color: ")
       sensor_name = (event:attr("name") || "sensor_"+random:word()).klog("Name: ")
       sensor_type = (event:attr("type") || "dht65").klog("Type: ")
-      
-      to_install = rids_to_install{"all"}.append(rids_to_install{sensor_type}.defaultsTo([]))
-      
+      to_install = rids_to_install{"all"}.append(rids_to_install{event:attr(sensor_type)}.defaultsTo([]));
     }
     send_directive("new sensor pico initiated", {"sensor_name":sensor_name})
     always {
       ent:sensors := ent:sensors.defaultsTo([]).union([sensor_name]);
       raise wrangler event "new_child_request"
         attributes { "name": sensor_name, "backgroundColor": sensor_color,
+                     "sensor_type": sensor_type,
                      "url_rids": to_install
                    }
     }
+  }
+
+ rule sensor_initialization {
+    select when wrangler new_child_created 
+    foreach event:attr("url_rids") setting(rid)
+      event:send(
+        { "eci": event:attr("eci"), "eid": random:word(),
+          "domain": "wrangler", "type": "install_ruleset_request",
+          "attrs": {
+            "absoluteURL":meta:rulesetURI,
+            "rid":rid,
+            "config":{},
+          }
+        }
+     )
   }
 
 
