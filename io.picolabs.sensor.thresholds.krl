@@ -53,34 +53,57 @@ ruleset io.picolabs.sensor.thresholds {
 	      lower_threshold = threshold_map{["limits","lower"]}
 	      upper_threshold = threshold_map{["limits","upper"]}
   
-	      sensor_type = event:attr("sensor_type")
+	    }
+      if(not threshold_map.isnull() ) then noop();
+      fired {
+        raise sensor event "check_threshold" attributes
+  	          {"reading": reading,
+               "name": name,
+ 	             "sensor_id": event:attr("sensor_id"),
+               "sensor_type": event:attr("sensor_type"),
+               "timestamp": event:attr("timestamp"),
+               "upper_threshold": upper_threshold,
+               "lower_threshold": lower_threshold
+             }
+      }
+    }
 
+    rule signal_violation {
+      select when sensor check_threshold
+      pre {
         // decide
+        upper_threshold = event:attr("upper_threshold")
+        lower_threshold = event:attr("lower_threshold")
+        reading = event:attr("reading")
+        name = event:attr("name")
+        sensor_type = event:attr("sensor_type")
 	      under = reading < lower_threshold;
 	      over = upper_threshold < reading;
 	      msg = under => << #{name} is under threshold of #{lower_threshold}>>
 	          | over  => << #{name} is over threshold of #{upper_threshold}>>
 	          |          << #{name} is between #{lower_threshold} and #{upper_threshold}>>;
       }
-      if(  (under || over) && not threshold_map.isnull() ) then noop();
+  
+      if( under || over ) then noop();
       fired {
             log warn << threshold: #{msg} for #{sensor_type} >>;
 	          raise sensor event "threshold_violation" attributes
-  	          {"reading": reading,
+  	          {"reading": event:attr("reading"),
+               "name": event:attr("name"),
  	             "sensor_id": event:attr("sensor_id"),
                "timestamp": event:attr("timestamp"),
 	             "threshold": under => lower_threshold | upper_threshold,
 	             "message": << threshold violation: #{msg} for #{sensor_type} >>
 	            }	      
      } else {
-            // this is ugly. 
-            log info << threshold: #{msg} for #{sensor_type} >>  if not threshold_map.isnull();
+            log info << threshold: #{msg} for #{sensor_type} >> ;
             raise sensor event "within_threshold" attributes
-  	          {"reading": reading,
+  	          {"reading": event:attr("reading"),
+               "name": event:attr("name"),
  	             "sensor_id": event:attr("sensor_id"),
                "timestamp": event:attr("timestamp"),
 		           "message": << within threshold: #{msg} for #{sensor_type} >>
-	            }	if  not threshold_map.isnull();
+	            }	;
      }
   }
   
