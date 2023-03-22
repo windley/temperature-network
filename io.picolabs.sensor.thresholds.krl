@@ -55,7 +55,7 @@ ruleset io.picolabs.sensor.thresholds {
 	    }
       if(not threshold_map.isnull() ) then noop();
       fired {
-        raise sensor event "check_threshold" attributes
+        raise sensor event "threshold_exists" attributes
   	          {"reading": reading,
                "name": name,
  	             "sensor_id": event:attr("sensor_id"),
@@ -68,7 +68,7 @@ ruleset io.picolabs.sensor.thresholds {
     }
 
     rule signal_violation {
-      select when sensor check_threshold
+      select when sensor threshold_exists
       pre {
         // decide
         upper_threshold = event:attr("upper_threshold")
