@@ -20,10 +20,7 @@ ruleset io.picolabs.sensor.thresholds {
       threshold_type => ent:thresholds{threshold_type}
                       | ent:thresholds
     }
-
-
   }
-
 
   // rule to save thresholds
   rule save_threshold {
@@ -65,41 +62,42 @@ ruleset io.picolabs.sensor.thresholds {
                "lower_threshold": lower_threshold
              }
       }
+  }
+
+  rule check_violation {
+    select when sensor threshold_exists
+    pre {
+      // decide
+      upper_threshold = event:attr("upper_threshold")
+      lower_threshold = event:attr("lower_threshold")
+      reading = event:attr("reading")
+      name = event:attr("name")
+      sensor_type = event:attr("sensor_type")
+      under = reading < lower_threshold;
+      over = upper_threshold < reading;
+      msg = under => << #{name} is under threshold of #{lower_threshold}>>
+          | over  => << #{name} is over threshold of #{upper_threshold}>>
+          |          << #{name} is between #{lower_threshold} and #{upper_threshold}>>;
+      attrs = {"reading": event:attr("reading"),
+               "name": event:attr("name"),
+               "sensor_id": event:attr("sensor_id"),
+               "timestamp": event:attr("timestamp"),
+               "pico_name": wrangler:name,
+               "threshold": under => lower_threshold | upper_threshold,
+               "message": << threshold violation: #{msg} for #{sensor_type} >>
+              }	      
+
     }
 
-    rule check_violation {
-      select when sensor threshold_exists
-      pre {
-        // decide
-        upper_threshold = event:attr("upper_threshold")
-        lower_threshold = event:attr("lower_threshold")
-        reading = event:attr("reading")
-        name = event:attr("name")
-        sensor_type = event:attr("sensor_type")
-	      under = reading < lower_threshold;
-	      over = upper_threshold < reading;
-	      msg = under => << #{name} is under threshold of #{lower_threshold}>>
-	          | over  => << #{name} is over threshold of #{upper_threshold}>>
-	          |          << #{name} is between #{lower_threshold} and #{upper_threshold}>>;
-        attrs = {"reading": event:attr("reading"),
-                 "name": event:attr("name"),
- 	               "sensor_id": event:attr("sensor_id"),
-                 "timestamp": event:attr("timestamp"),
-	               "threshold": under => lower_threshold | upper_threshold,
-	               "message": << threshold violation: #{msg} for #{sensor_type} >>
-	              }	      
-
-      }
-  
-      if( under || over ) then noop();
-      fired {
-            log warn << threshold: #{msg} for #{sensor_type} >>;
-	          raise sensor event "threshold_violation" attributes
-              attrs.put(["threshold"], under => lower_threshold | upper_threshold)
-     } else {
-            log info << threshold: #{msg} for #{sensor_type} >> ;
-            raise sensor event "within_threshold" attributes attrs;
-     }
+    if( under || over ) then noop();
+    fired {
+          log warn << threshold: #{msg} for #{sensor_type} >>;
+          raise sensor event "threshold_violation" attributes
+            attrs.put(["threshold"], under => lower_threshold | upper_threshold)
+    } else {
+          log info << threshold: #{msg} for #{sensor_type} >> ;
+          raise sensor event "within_threshold" attributes attrs;
+    }
   }
   
   rule inialize_ruleset {
