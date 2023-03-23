@@ -42,8 +42,8 @@ ruleset io.picolabs.iotplotter {
   rule send_data_to_IoTPlotter {
     select when sensor new_readings
 
-    send_payload(meta:rulesetConfig{["feed_id"]} || ent:feed_id,
-                 meta:rulesetConfig{["api_key"]} || ent:api_key,
+    send_payload((meta:rulesetConfig{["feed_id"]} || ent:feed_id).klog("Feed id"),
+                 (meta:rulesetConfig{["api_key"]} || ent:api_key).klog("API key"),
                  event:attrs) setting(resp)
    
     always {
