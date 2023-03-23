@@ -50,32 +50,6 @@ ruleset io.picolabs.iotplotter {
       response =  resp.klog("POST response");
     }
   }
-  
-
-
-  rule send_temperature_data_to_IoTPlotter {
-    select when lht65 new_readings
-
-    send_payload(meta:rulesetConfig{["feed_id"]},
-                 meta:rulesetConfig{["api_key"]},
-                 event:attrs) setting(resp)
-   
-    always {
-      response =  resp.klog("POST response");
-    }
-  }
-  
-  rule send_soil_data_to_IoTPlotter {
-    select when lse01 new_readings
-
-    send_payload(meta:rulesetConfig{["feed_id"]},
-                 meta:rulesetConfig{["api_key"]},
-                 event:attrs) setting(resp)
-   
-    always {
-      response =  resp.klog("POST response");
-    }
-  }
 
   rule save_config {
     select when sensor configuration
