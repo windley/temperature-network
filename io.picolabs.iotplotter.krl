@@ -8,6 +8,8 @@ ruleset io.picolabs.iotplotter {
 
     use module io.picolabs.wrangler alias wrangler
 
+    shares show_configuration
+
   }
 
   global {
@@ -35,9 +37,12 @@ ruleset io.picolabs.iotplotter {
       return resp
     }
 
+    show_configuration = function() {
+      return {"api_key": ent:api_key,
+              "feed_id": ent:feed_id}
+    }
+
   }
-
-
 
   rule send_data_to_IoTPlotter {
     select when sensor new_readings
@@ -54,8 +59,8 @@ ruleset io.picolabs.iotplotter {
   rule save_config {
     select when sensor configuration
     pre {
-      feed_id = event:attr("iotplotter_feed_id").as("String");
-      api_key = event:attr("iotplotter_api_key").as("String");
+      feed_id = event:attr("iotplotter_feed_id");
+      api_key = event:attr("iotplotter_api_key");
     }
     if not feed_id && not api_key then noop()
     fired {
