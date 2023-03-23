@@ -80,8 +80,8 @@ ruleset io.picolabs.iotplotter {
   rule save_config {
     select when sensor configuration
     pre {
-      feed_id = event:attr("iotplotter_feed_id");
-      api_key = event:attr("iotplotter_api_key");
+      feed_id = event:attr("iotplotter_feed_id").as("String");
+      api_key = event:attr("iotplotter_api_key").as("String");
     }
     if not feed_id.isnull() && not api_key.isnull() then noop()
     fired {
