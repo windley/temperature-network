@@ -8,7 +8,7 @@ ruleset io.picolabs.iotplotter {
 
     use module io.picolabs.wrangler alias wrangler
 
-    shares show_configuration
+    //shares show_configuration
 
   }
 
