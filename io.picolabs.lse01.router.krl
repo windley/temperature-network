@@ -114,10 +114,13 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
   rule create_channels {
     select when wrangler ruleset_installed where event:attr("rids") >< ctx:rid
     foreach channels setting(channel)
-      wrangler:createChannel(channel{"tags"},
-                             channel{"eventPolicy"},
-                             channel{"queryPolicy"}) setting(new_channel)
-                             
+      pre {
+        existing_channels = wrangler:channels(channel{"tags"}.join(","));
+      }
+      if existing_channels.length() == 0 then 
+          wrangler:createChannel(channel{"tags"},
+                                 channel{"eventPolicy"},
+                                 channel{"queryPolicy"}) setting(new_channel)
   }
 
   rule inialize_ruleset {
