@@ -69,7 +69,8 @@ ruleset io.picolabs.sensor.community {
       raise wrangler event "new_child_request"
         attributes { "name": sensor_name, "backgroundColor": sensor_color,
                      "sensor_type": sensor_type,
-                     "url_rids": to_install
+                     "url_rids": to_install,
+                     "config": event:attr("config")
                    }
     }
   }
@@ -83,7 +84,7 @@ ruleset io.picolabs.sensor.community {
           "attrs": {
             "absoluteURL":meta:rulesetURI,
             "rid":rid,
-            "config":{},
+            "config":event:attr("config"),
           }
         }
      )
