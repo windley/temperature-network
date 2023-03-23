@@ -62,7 +62,7 @@ ruleset io.picolabs.iotplotter {
       feed_id = event:attr("iotplotter_feed_id");
       api_key = event:attr("iotplotter_api_key");
     }
-    if not feed_id && not api_key then noop()
+    if not (feed_id.isnull() || api_key.isnull()) then noop()
     fired {
       log info "Configuring IoT Plotter";
       ent:feed_id := feed_id;
