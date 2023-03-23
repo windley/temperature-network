@@ -42,8 +42,8 @@ ruleset io.picolabs.iotplotter {
   rule send_data_to_IoTPlotter {
     select when sensor new_readings
 
-    send_payload(meta:rulesetConfig{["feed_id"]},
-                 meta:rulesetConfig{["api_key"]},
+    send_payload(meta:rulesetConfig{["feed_id"]} || ent:iotplotter_feed_id,
+                 meta:rulesetConfig{["api_key"]} || ent:iotplotter_api_key,
                  event:attrs) setting(resp)
    
     always {
@@ -76,6 +76,19 @@ ruleset io.picolabs.iotplotter {
       response =  resp.klog("POST response");
     }
   }
-  
+
+  rule save_config {
+    select when sensor configuration
+    pre {
+      feed_id = event:attr("iotplotter_feed_id");
+      api_key = event:attr("iotplotter_api_key");
+    }
+    if not feed_id.isnull() && not api_key.isnull() then noop()
+    fired {
+      log info "Configuring IoT Plotter";
+      ent:feed_id := event:attr("feed_id");
+      ent:api_key := event:attr("api_key");
+    }
+  }
 
 }
