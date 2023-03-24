@@ -7,6 +7,7 @@ ruleset io.picolabs.sensor.community {
     version "draft"
 
     use module io.picolabs.wrangler alias wrangler
+    use module io.picolabs.prowl alias prowl with apikey = meta:rulesetConfig{["apikey"]}
    
     shares
       children,
@@ -108,9 +109,13 @@ ruleset io.picolabs.sensor.community {
   rule create_channels {
     select when wrangler ruleset_installed where event:attr("rids") >< ctx:rid
     foreach channels setting(channel)
-      wrangler:createChannel(channel{"tags"},
-                             channel{"eventPolicy"},
-                             channel{"queryPolicy"}) setting(new_channel)
+     pre {
+        existing_channels = wrangler:channels(channel{"tags"}.join(","));
+      }
+      if existing_channels.length() == 0 then 
+         wrangler:createChannel(channel{"tags"},
+                                channel{"eventPolicy"},
+                                channel{"queryPolicy"}) setting(new_channel)
                              
   }
 
