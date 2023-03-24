@@ -99,6 +99,15 @@ ruleset io.picolabs.sensor.thresholds {
           raise sensor event "within_threshold" attributes attrs;
     }
   }
+
+  rule send_violation_to_parent {
+    select when sensor threshold_violation
+    event:send({"eci": wrangler:parent_eci,
+                "domain": "sensor",
+                "type": "threshold_violation",
+                "attrs": event:attrs
+               })
+   }
   
   rule inialize_ruleset {
     select when wrangler ruleset_installed where event:attr("rids") >< meta:rid
