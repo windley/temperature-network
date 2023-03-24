@@ -7,7 +7,7 @@ ruleset io.picolabs.sensor.community {
     version "draft"
 
     use module io.picolabs.wrangler alias wrangler
-    use module io.picolabs.prowl alias prowl with apikey = meta:rulesetConfig{["apikey"]}
+    use module io.picolabs.prowl alias prowl with apikey = meta:rulesetConfig{["prowl_apikey"]}
    
     shares
       children,
