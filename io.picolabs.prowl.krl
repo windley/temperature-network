@@ -25,7 +25,9 @@ ruleset io.picolabs.prowl {
        "event": title,
        "description" : description,
        "url": url
-      })
+      }) setting (resp)
+
+      return resp
     } 
   }
 }

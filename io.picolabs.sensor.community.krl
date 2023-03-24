@@ -90,10 +90,13 @@ ruleset io.picolabs.sensor.community {
     pre {
       msg = <<
 Sensor #{event:attr("pico_name")}
-#{event:attr("message")}
+#{event:attr("message")}.klog("Message");
 >>
     }
-    prowl:notify("Threshold Violatoin", msg, priority=1);
+    prowl:notify("Threshold Violatoin", msg, priority=1) setting(resp);
+    fired {
+      log info resp
+    }
   }
 
   rule sensor_initialization {
