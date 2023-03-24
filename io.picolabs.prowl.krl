@@ -8,7 +8,7 @@ ruleset io.picolabs.prowl {
     
 
     configure using apikey = "nokey"
-                    providerkey = "nokey"
+                    providerkey = ""
                     application = "Pico Labs"
     provides notify
   }
