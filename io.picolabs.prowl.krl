@@ -18,16 +18,16 @@ ruleset io.picolabs.prowl {
   
      http:post("https://api.prowlapp.com/publicapi/add", 
       form = {
-       "apikey":apikey,
+       "apikey":apikey.klog("API Key: "),
        "providerkey":providerkey,
        "application":application,
        "priority": priority < -2 || priority > 2 => 0 | priority,
-       "event": title,
-       "description" : description,
+       "event": title.klog("Title: "),
+       "description" : description.klog("Desc: "),
        "url": url
       }) setting (resp)
 
-      return resp
+      return resp.klog("Response: ")
     } 
   }
 }
