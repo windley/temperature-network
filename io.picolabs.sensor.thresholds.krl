@@ -102,7 +102,7 @@ ruleset io.picolabs.sensor.thresholds {
 
   rule send_violation_to_parent {
     select when sensor threshold_violation
-    event:send({"eci": wrangler:parent_eci,
+    event:send({"eci": wrangler:parent_eci.klog("Parent ECI"),
                 "domain": "sensor",
                 "type": "threshold_violation",
                 "attrs": event:attrs
