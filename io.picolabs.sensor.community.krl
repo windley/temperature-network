@@ -75,7 +75,28 @@ ruleset io.picolabs.sensor.community {
     }
   }
 
- rule sensor_initialization {
+// {
+//   "reading": 74.462,
+//   "name": "device_temperature",
+//   "sensor_id": "05951733-104c-45c5-99d5-1b646d061fce",
+//   "timestamp": 1679697222921,
+//   "pico_name": "lht65_test",
+//   "threshold": 60,
+//   "message": " threshold violation:  device_temperature is over threshold of 60 for dragino_lht65 "
+// }
+
+  rule catch_threshold_violation {
+    select when sensor threshold_violation
+    pre {
+      msg = <<
+Sensor #{event:attr("pico_name")}
+#{event:attr("message")}
+>>
+    }
+    prowl:notify("Threshold Violatoin", msg, priority=1);
+  }
+
+  rule sensor_initialization {
     select when wrangler new_child_created 
     foreach event:attr("url_rids") setting(rid)
       event:send(

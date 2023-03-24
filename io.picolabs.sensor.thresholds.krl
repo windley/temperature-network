@@ -75,9 +75,9 @@ ruleset io.picolabs.sensor.thresholds {
       sensor_type = event:attr("sensor_type")
       under = reading < lower_threshold;
       over = upper_threshold < reading;
-      msg = under => << #{name} is under threshold of #{lower_threshold}>>
-          | over  => << #{name} is over threshold of #{upper_threshold}>>
-          |          << #{name} is between #{lower_threshold} and #{upper_threshold}>>;
+      msg = under => <<Sensor #{name} is under threshold of #{lower_threshold}>>
+          | over  => <<Sensor #{name} is over threshold of #{upper_threshold}>>
+          |          <<Sensor #{name} is between #{lower_threshold} and #{upper_threshold}>>;
       attrs = {"reading": event:attr("reading"),
                "name": event:attr("name"),
                "sensor_id": event:attr("sensor_id"),
