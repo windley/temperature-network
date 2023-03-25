@@ -40,6 +40,13 @@ ruleset io.picolabs.sensor.thresholds {
     }
   }
 
+  rule clear_threshold {
+    select when sensor threshold_not_needed
+    always {
+      clear ent:thresholds{event:attr("threshold_type")}
+    }
+  }
+
   rule check_threshold {
     select when sensor new_readings
 
