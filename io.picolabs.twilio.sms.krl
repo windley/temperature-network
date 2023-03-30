@@ -31,7 +31,7 @@ ruleset io.picolabs.twilio.sms.krl {
     //outgoing actions
     send_sms = defaction(to, from, message){ 
         http:post(base_url + "SMS/Messages", 
-            json = {
+            form = {
                 "From":from,
                 "To":to,
                 "Body":message
