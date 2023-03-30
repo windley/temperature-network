@@ -1,12 +1,9 @@
 ruleset io.picolabs.twilio.sms.krl {
   meta {
     name "Twilio Module for SMS only"
-    description <<
-      Utility methods for sending SMS with Twilio
-    >>
+    description "Utility methods for sending SMS with Twilio"
     author "Phil Windley"
-    
-    configure using twiliokeys = {}
+    version "0.1.0"
     
     provides 
         //actions
