@@ -5,22 +5,17 @@ ruleset io.picolabs.twilio.sms.krl {
     author "Phil Windley"
     version "0.1.0"
     
-    provides 
-        //actions
-        send_sms
+    provides send_sms
 
     shares show_configuration
+
+    configure using from_number = "801-555-1212"
+                    account_sid = ""
+                    auth_token = ""
 
   }
 
   global {
-    
-    from_number =  meta:rulesetConfig{["from_number"]} || ent:from_number 
-  
-    account_sid = meta:rulesetConfig{["account_sid"]} || ent:account_sid
-    auth_token = meta:rulesetConfig{["auth_token"]} || ent:auth_token
-    
-    base_url = "https://#{account_sid}:#{auth_token}@api.twilio.com/2010-04-01/Accounts/#{account_sid}/"
     
     show_configuration = function() {
       return {"account_sid": ent:account_sid,
@@ -28,6 +23,13 @@ ruleset io.picolabs.twilio.sms.krl {
               "from_number": ent:from_number}
     }
 
+    from_number =  from_number || show_configuration(){["from_number"]}
+    account_sid = account_sid || show_configuration(){["account_sid"]} 
+    auth_token = auth_token || show_configuration(["auth_token"] )
+    
+    base_url = "https://#{account_sid}:#{auth_token}@api.twilio.com/2010-04-01/Accounts/#{account_sid}/"
+    
+    
     //outgoing actions
     send_sms = defaction(to, from, message){ 
         http:post(base_url + "SMS/Messages", 
