@@ -22,6 +22,8 @@ ruleset io.picolabs.sensor.community {
 
   global {
 
+    sms_notification_number = "8013625611"
+
     channels = [
       {"tags": ["sensor"],
        "eventPolicy": {
@@ -97,7 +99,8 @@ Sensor #{event:attr("pico_name")}
 #{event:attr("message")}
 >>
     }
-    prowl:notify("Threshold Violatoin", msg, priority=1) setting(resp);
+    //prowl:notify("Threshold Violatoin", msg, priority=1) setting(resp);
+    twilio:sms(msg, sms_notification_number)
   }
 
   rule sensor_initialization {
