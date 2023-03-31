@@ -100,7 +100,7 @@ Sensor #{event:attr("pico_name")}
 >>
     }
     //prowl:notify("Threshold Violatoin", msg, priority=1) setting(resp);
-    twilio:sms(msg, sms_notification_number)
+    twilio:send_sms(msg, sms_notification_number)
   }
 
   rule sensor_initialization {
