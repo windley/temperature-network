@@ -1,4 +1,4 @@
-ruleset io.picolabs.twilio.sms.krl {
+ruleset io.picolabs.twilio.sms {
   meta {
     name "Twilio Module for SMS only"
     description "Utility methods for sending SMS with Twilio"
