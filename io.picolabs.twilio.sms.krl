@@ -27,7 +27,7 @@ ruleset io.picolabs.twilio.sms {
     // account_sid = account_sid || show_configuration(){["account_sid"]} 
     // auth_token = auth_token || show_configuration(["auth_token"] )
     
-    base_url = "https://#{account_sid}:#{auth_token}@api.twilio.com/2010-04-01/Accounts/#{account_sid}/"
+    base_url = <<https://#{account_sid}:#{auth_token}@api.twilio.com/2010-04-01/Accounts/#{account_sid}/>>
     
     
     //outgoing actions
