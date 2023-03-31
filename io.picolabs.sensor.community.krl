@@ -94,7 +94,7 @@ ruleset io.picolabs.sensor.community {
   rule catch_threshold_violation {
     select when sensor threshold_violation
     pre {
-      msg = <<Sensor #{event:attr("pico_name")} #{event:attr("message")}>>
+      msg = <<Threshold violation on #{event:attr("pico_name")}: #{event:attr("message")}>>
     }
     //prowl:notify("Threshold Violatoin", msg, priority=1) setting(resp);
     twilio:send_sms(msg, sms_notification_number)
