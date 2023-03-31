@@ -9,9 +9,9 @@ ruleset io.picolabs.sensor.community {
     use module io.picolabs.wrangler alias wrangler
     use module io.picolabs.prowl alias prowl with apikey = meta:rulesetConfig{["prowl_apikey"]} 
                                                   providerkey = meta:rulesetConfig{["prowl_providerkey"]}
-    use module io.picolabs.twilio.sms alias twilio with from_number = meta:rulesetConfig{["from_number"]}
-                                                        account_sid = meta:rulesetConfig{["account_sid"]} 
-                                                        auth_token = meta:rulesetConfig{["auth_token"]}
+    use module io.picolabs.twilio.sms alias twilio with from_number = meta:rulesetConfig{["twilio_from_number"]}
+                                                        account_sid = meta:rulesetConfig{["twilio_account_sid"]} 
+                                                        auth_token = meta:rulesetConfig{["twilio_auth_token"]}
    
     shares
       children,
