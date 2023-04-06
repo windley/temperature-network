@@ -37,7 +37,7 @@ Received and decodes heartbeat information from a Dragino LHT65
      }];
 
 
-    cToF = function(c){c*1.8+32};
+    cToF = function(c){math:int(c*180+32)/100}; // two decimal places
     fix_temperatures = function(x){math:int(x < 32768 => x | x-65536)/100}; 
 
 
