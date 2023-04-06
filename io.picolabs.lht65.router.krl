@@ -40,7 +40,15 @@ Received and decodes heartbeat information from a Dragino LHT65
     cToF = function(c){math:int(c*180+3200)/100}; // two decimal places
     fix_temperatures = function(x){math:int(x < 32768 => x | x-65536)/100}; 
 
-   
+
+    get_payload = function(sensor_type){
+      payload = event:attrs{["payload"]}
+      decoded = math:base64decode(payload.klog("Payload"),"hex").klog("Decoded")
+      split_str = (sensor_type == "lht65") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#).klog("Split") 
+                                     | []
+      payload_array = split_str.map(function(x){x.as("Number")}).klog("Values");
+      return payload_array
+    }
 
 
     // API functions
