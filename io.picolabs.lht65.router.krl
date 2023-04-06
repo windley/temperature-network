@@ -41,8 +41,7 @@ Received and decodes heartbeat information from a Dragino LHT65
     fix_temperatures = function(x){math:int(x < 32768 => x | x-65536)/100}; 
 
 
-    get_payload = function(sensor){
-      payload = event:attrs{["payload"]}
+    get_payload = function(sensor, payload){
       decoded = math:base64decode(payload,"hex")
       split = (sensor == "lht65") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#)
                                    | []
@@ -133,11 +132,8 @@ Received and decodes heartbeat information from a Dragino LHT65
   rule process_heartbeat {
       select when lht65 heartbeat
       pre {
-        // payload = event:attrs{["payload"]} || testHeartbeat{"payload"};
-        // decoded = math:base64decode(payload.klog("Payload"),"hex").klog("Decoded")
-        // split_str = decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#).klog("Split")
-        // payload_array = split_str.map(function(x){x.as("Number")}).klog("Values");
-        payload_array = get_payload("lht65")
+        payload_array = get_payload("lht65", event:attrs{["payload"]}
+        )
         // element 0 - battery
         battery_status = payload_array[0].shiftRight(14).klog("Battery status")
         battery_voltage = payload_array[0].band("3FFF").klog("Battery voltage (mV)")
