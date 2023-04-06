@@ -41,12 +41,12 @@ Received and decodes heartbeat information from a Dragino LHT65
     fix_temperatures = function(x){math:int(x < 32768 => x | x-65536)/100}; 
 
 
-    get_payload = function(sensor_type){
+    get_payload = function(sensor){
       payload = event:attrs{["payload"]}
       decoded = math:base64decode(payload.klog("Payload"),"hex").klog("Decoded")
-      split_str = (sensor_type == "lht65") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#).klog("Split") 
-                                     | []
-      payload_array = split_str.map(function(x){x.as("Number")}).klog("Values");
+      split = (sensor == "lht65") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#).klog("Split") 
+                                   | []
+      payload_array = split.map(function(x){x.as("Number")}).klog("Values");
       return payload_array
     }
 
@@ -133,14 +133,15 @@ Received and decodes heartbeat information from a Dragino LHT65
   rule process_heartbeat {
       select when lht65 heartbeat
       pre {
-        payload = event:attrs{["payload"]} || testHeartbeat{"payload"};
-        decoded = math:base64decode(payload.klog("Payload"),"hex").klog("Decoded")
-        split_str = decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#).klog("Split")
-        payload_array = split_str.map(function(x){x.as("Number")}).klog("Values");
-        temperature = cToF(fix_temperatures(payload_array[1])).klog("Temperature (F)")
-        humidity = (payload_array[2]/10).klog("Relative Humidity")
+        // payload = event:attrs{["payload"]} || testHeartbeat{"payload"};
+        // decoded = math:base64decode(payload.klog("Payload"),"hex").klog("Decoded")
+        // split_str = decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#).klog("Split")
+        // payload_array = split_str.map(function(x){x.as("Number")}).klog("Values");
+        payload_array = get_payload("lht65")
         battery_status = payload_array[0].shiftRight(14).klog("Battery status")
         battery_voltage = payload_array[0].band("3FFF").klog("Battery voltage (mV)")
+        temperature = cToF(fix_temperatures(payload_array[1])).klog("Temperature (F)")
+        humidity = (payload_array[2]/10).klog("Relative Humidity")
         external_sensor = (payload_array[3] == 1) => "Temperature" | "Something else"
         probe_connected = (not (payload_array[4] == 32767)).klog("Probe connected?")
         celsius_temp = fix_temperatures(payload_array[4]).klog("Temperature Probe (C)");
