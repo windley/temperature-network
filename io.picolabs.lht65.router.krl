@@ -43,8 +43,8 @@ Received and decodes heartbeat information from a Dragino LHT65
 
     get_payload = function(sensor){
       payload = event:attrs{["payload"]}
-      decoded = math:base64decode(payload.klog("Payload"),"hex").klog("Decoded")
-      split = (sensor == "lht65") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#).klog("Split") 
+      decoded = math:base64decode(payload,"hex")
+      split = (sensor == "lht65") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#)
                                    | []
       payload_array = split.map(function(x){x.as("Number")}).klog("Values");
       return payload_array
