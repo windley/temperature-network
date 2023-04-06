@@ -138,11 +138,16 @@ Received and decodes heartbeat information from a Dragino LHT65
         // split_str = decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#).klog("Split")
         // payload_array = split_str.map(function(x){x.as("Number")}).klog("Values");
         payload_array = get_payload("lht65")
+        // element 0 - battery
         battery_status = payload_array[0].shiftRight(14).klog("Battery status")
         battery_voltage = payload_array[0].band("3FFF").klog("Battery voltage (mV)")
+        // element 1 - device temperature
         temperature = cToF(fix_temperatures(payload_array[1])).klog("Temperature (F)")
+        // element 2 - humidity
         humidity = (payload_array[2]/10).klog("Relative Humidity")
+        // element 3 - external probe type
         external_sensor = (payload_array[3] == 1) => "Temperature" | "Something else"
+        // element 4 - external probe value
         probe_connected = (not (payload_array[4] == 32767)).klog("Probe connected?")
         celsius_temp = fix_temperatures(payload_array[4]).klog("Temperature Probe (C)");
         external_temp = cToF(celsius_temp).klog("Temperature Probe (F)");
