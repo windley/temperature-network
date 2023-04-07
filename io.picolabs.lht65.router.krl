@@ -152,8 +152,7 @@ Received and decodes heartbeat information from a Dragino LHT65
         external_sensor = (payload_array[3] == 1) => "Temperature" | "Something else"
         // element 4 - external probe value
         probe_connected = (not (payload_array[4] == 32767)).klog("Probe connected?")
-        celsius_temp = dragino:fix_temperatures(payload_array[4]).klog("Temperature Probe (C)");
-        external_temp = dragino:cToF(celsius_temp).klog("Temperature Probe (F)");
+        external_temp = dragino:cToF(dragino:fix_temperatures(payload_array[4])).klog("Temperature Probe (F)");
 
         sensor_data = {"device_temperature": temperature,
                        "humidity": humidity,
