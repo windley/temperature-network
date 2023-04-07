@@ -140,20 +140,20 @@ Received and decodes heartbeat information from a Dragino LHT65
   rule process_heartbeat {
       select when lht65 heartbeat
       pre {
-        payload_array = get_payload("lht65", event:attrs{["payload"]}
+        payload_array = dragino:get_payload("lht65", event:attrs{["payload"]}
         )
-        battery_status = get_battery_status("lht65", payload_array).klog("Battery status")
-        battery_voltage = get_battery_value("lht65", payload_array).klog("Battery voltage (mV)")
+        battery_status = dragino:get_battery_status("lht65", payload_array).klog("Battery status")
+        battery_voltage = dragino:get_battery_value("lht65", payload_array).klog("Battery voltage (mV)")
         // element 1 - device temperature
-        temperature = cToF(fix_temperatures(payload_array[1])).klog("Temperature (F)")
+        temperature = dragino:cToF(dragino:fix_temperatures(payload_array[1])).klog("Temperature (F)")
         // element 2 - humidity
         humidity = (payload_array[2]/10).klog("Relative Humidity")
         // element 3 - external probe type
         external_sensor = (payload_array[3] == 1) => "Temperature" | "Something else"
         // element 4 - external probe value
         probe_connected = (not (payload_array[4] == 32767)).klog("Probe connected?")
-        celsius_temp = fix_temperatures(payload_array[4]).klog("Temperature Probe (C)");
-        external_temp = cToF(celsius_temp).klog("Temperature Probe (F)");
+        celsius_temp = dragino:fix_temperatures(payload_array[4]).klog("Temperature Probe (C)");
+        external_temp = dragino:cToF(celsius_temp).klog("Temperature Probe (F)");
 
         sensor_data = {"device_temperature": temperature,
                        "humidity": humidity,
