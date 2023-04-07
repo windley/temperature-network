@@ -4,7 +4,7 @@ ruleset io.picolabs.dragino {
         description "Provides functions for using Dragino devices"
         author "PJW"
         version "0.1.0"
-        share get_payload, cToF, fix_temperatures, get_battery_status, get_battery_value
+        shares get_payload, cToF, fix_temperatures, get_battery_status, get_battery_value
     }
 
     global {
