@@ -23,7 +23,7 @@ ruleset io.picolabs.dragino {
         get_battery_status = function(sensor, payload){
           // sensor unused unless battery status is in different places on different sensor types
           status_value = payload[0].shiftRight(14)
-          statuses = ["good", "ok", "low", "ultra_low"]
+          statuses = ["ultra_low", "low", "ok", "good"]
           statuses[status_value]
         }
         get_battery_value = function(sensor, payload){
