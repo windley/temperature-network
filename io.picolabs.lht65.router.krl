@@ -37,27 +37,6 @@ Received and decodes heartbeat information from a Dragino LHT65
        }
      }];
 
-
-    cToF = function(c){math:int(c*180+3200)/100}; // two decimal places
-    fix_temperatures = function(x){math:int(x < 32768 => x | x-65536)/100}; 
-
-    get_payload = function(sensor, payload){
-      decoded = math:base64decode(payload,"hex")
-      split = (sensor == "lht65") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#) 
-            | (sensor == "lse01") => decoded.extract(re#(.{4})(.{4})(.{4})(.{4})(.{4})(.{2})#)
-                                   | []
-      payload_array = split.map(function(x){x.as("Number")}).klog("Values");
-      return payload_array
-    }
-    get_battery_status = function(sensor, payload){
-      // sensor unused unless battery status is in different places on different sensor types
-      payload[0].shiftRight(14)
-    }
-    get_battery_value = function(sensor, payload){
-      // sensor unused unless battery status is in different places on different sensor types
-      payload[0].band("3FFF")
-    }
-
     // API functions
     lastHeartbeat = function() {
       ent:lastHeartbeat.klog("Return value ")
@@ -140,10 +119,9 @@ Received and decodes heartbeat information from a Dragino LHT65
   rule process_heartbeat {
       select when lht65 heartbeat
       pre {
-        payload_array = dragino:get_payload("lht65", event:attrs{["payload"]}
-        )
-        battery_status = dragino:get_battery_status("lht65", payload_array).klog("Battery status")
-        battery_voltage = dragino:get_battery_value("lht65", payload_array).klog("Battery voltage (mV)")
+        payload_array = dragino:get_payload("lht65", event:attrs{["payload"]})
+        battery_status = dragino:get_battery_status("lht65", payload_array)
+        battery_voltage = dragino:get_battery_value("lht65", payload_array)
         // element 1 - device temperature
         temperature = dragino:cToF(dragino:fix_temperatures(payload_array[1])).klog("Temperature (F)")
         // element 2 - humidity

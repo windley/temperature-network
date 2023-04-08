@@ -15,20 +15,20 @@ ruleset io.picolabs.dragino {
         get_payload = function(sensor, payload){
             decoded = math:base64decode(payload,"hex")
             split = (sensor == "lht65") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#) 
-                  | (sensor == "lse01") => decoded.extract(re#(.{4})(.{4})(.{4})(.{4})(.{4})(.{2})#)
-                                         | []
+                    | (sensor == "lse01") => decoded.extract(re#(.{4})(.{4})(.{4})(.{4})(.{4})(.{2})#)
+                                            | []
             payload_array = split.map(function(x){x.as("Number")}) //.klog("Values")
             return payload_array
         }
         get_battery_status = function(sensor, payload){
-          // sensor unused unless battery status is in different places on different sensor types
-          status_value = payload[0].shiftRight(14)
-          statuses = ["ultra_low", "low", "ok", "good"]
-          statuses[status_value]
+            // sensor unused unless battery status is in different places on different sensor types
+            status_value = payload[0].shiftRight(14)
+            statuses = ["ultra_low", "low", "ok", "good"]
+            statuses[status_value] //.klog("Battery status")
         }
         get_battery_value = function(sensor, payload){
-          // sensor unused unless battery status is in different places on different sensor types
-          payload[0].band("3FFF")
+            // sensor unused unless battery status is in different places on different sensor types
+            payload[0].band("3FFF") //.klog("Battery voltage (mV)")
         }
     }
 }

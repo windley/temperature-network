@@ -7,6 +7,7 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
     author "PJW"
 
     use module io.picolabs.wrangler alias wrangler
+    use module io.picolabs.dragino alias dragino
 
     share lastHeartbeat, lastMoisture, lastTemperature, lastConductivity
 
@@ -77,16 +78,14 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
   rule process_heartbeat {
       select when lse01 heartbeat
       pre {
-        payload = event:attrs{["payload"]};
-        decoded = math:base64decode(payload.klog("Payload"),"hex").klog("Decoded")
-        split_str = decoded.extract(re#(.{4})(.{4})(.{4})(.{4})(.{4})(.{2})#).klog("Split")
-        payload_array = split_str.map(function(x){x.as("Number")}).klog("Values");
+        payload_array = dragino:get_payload("lse01", event:attrs{["payload"]})
+        battery_status = dragino:get_battery_status("lse01", payload_array)
+        battery_voltage = dragino:get_battery_value("lse01", payload_array)
+        
         moisture = (payload_array[2]/100).klog("Moisture (%)")
-        temperature = cToF(fix_temperatures(payload_array[3])).klog("Temperature (F)")
+        temperature = dragino:cToF(dragino:fix_temperatures(payload_array[3])).klog("Temperature (F)")
         conductivity = payload_array[4].klog("Conductivity (uS/cm)")
-        battery_status = payload_array[0].shiftRight(14).klog("Battery status")
-        battery_voltage = payload_array[0].band("3FFF").klog("Battery voltage (mV)")
-
+        
         sensor_data = {"moisture": moisture,
                        "temperature": temperature,
                        "conductivity": conductivity,
