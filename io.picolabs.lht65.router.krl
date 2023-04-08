@@ -119,16 +119,19 @@ Received and decodes heartbeat information from a Dragino LHT65
   rule process_heartbeat {
       select when lht65 heartbeat
       pre {
+// Array index    0       1           2           3         4            
+// Size(bytes)    2       2           2           1         4
+// Value          BAT     Built-In    Built-in    Ext #     Ext value
+//                        Temperature Humidity
+//
+// First 6 bytes: has fix meanings for every device.
+// The 7th byte (EXT #): defines the external sensor model. (0 if missing, 1 for temperature)
         payload_array = dragino:get_payload("lht65", event:attrs{["payload"]})
         battery_status = dragino:get_battery_status("lht65", payload_array)
         battery_voltage = dragino:get_battery_value("lht65", payload_array)
-        // element 1 - device temperature
         temperature = dragino:cToF(dragino:fix_temperatures(payload_array[1])).klog("Temperature (F)")
-        // element 2 - humidity
         humidity = (payload_array[2]/10).klog("Relative Humidity")
-        // element 3 - external probe type
         external_sensor = (payload_array[3] == 1) => "Temperature" | "Something else"
-        // element 4 - external probe value
         probe_connected = (not (payload_array[4] == 32767)).klog("Probe connected?")
         external_temp = dragino:cToF(dragino:fix_temperatures(payload_array[4])).klog("Temperature Probe (F)");
 

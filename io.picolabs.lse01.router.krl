@@ -78,6 +78,10 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
   rule process_heartbeat {
       select when lse01 heartbeat
       pre {
+// Array index    0     1                     2             3                 4                 X       
+// Size(bytes)    2	    2	                    2   	        2    	            2   	            1
+// Value	        BAT	  Temperature           Soil Moisture	Soil Temperature	Soil Conductivity MOD & Digital Interrupt(Optional)
+//                      (Reserve, Ignore now)               (EC)
         payload_array = dragino:get_payload("lse01", event:attrs{["payload"]})
         battery_status = dragino:get_battery_status("lse01", payload_array)
         battery_voltage = dragino:get_battery_value("lse01", payload_array)
