@@ -78,6 +78,7 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
   rule process_heartbeat {
       select when lse01 heartbeat
       pre {
+// Payload array for LSE01
 // Array index    0     1                     2             3                 4                 X       
 // Size(bytes)    2	    2	                    2   	        2    	            2   	            1
 // Value	        BAT	  Temperature           Soil Moisture	Soil Temperature	Soil Conductivity MOD & Digital Interrupt(Optional)

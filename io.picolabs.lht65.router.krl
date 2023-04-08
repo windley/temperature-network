@@ -119,6 +119,7 @@ Received and decodes heartbeat information from a Dragino LHT65
   rule process_heartbeat {
       select when lht65 heartbeat
       pre {
+// Payload array for LHT65
 // Array index    0       1           2           3         4            
 // Size(bytes)    2       2           2           1         4
 // Value          BAT     Built-In    Built-in    Ext #     Ext value
