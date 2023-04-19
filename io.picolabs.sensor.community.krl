@@ -45,6 +45,7 @@ ruleset io.picolabs.sensor.community {
                        "lse01": ["io.picolabs.lse01.router"],
                        "all":   ["io.picolabs.sensor.thresholds",
                                  "io.picolabs.iotplotter",
+                                 "io.piocolabs.dragino"
                                 ]
                      };
 
