@@ -61,7 +61,26 @@ ruleset io.picolabs.sensor.community {
     };
 
   }
- 
+
+  // {
+  //   "reading": 74.462,
+  //   "name": "device_temperature",
+  //   "sensor_id": "05951733-104c-45c5-99d5-1b646d061fce",
+  //   "timestamp": 1679697222921,
+  //   "pico_name": "lht65_test",
+  //   "threshold": 60,
+  //   "message": " threshold violation:  device_temperature is over threshold of 60 for dragino_lht65 "
+  // }
+  rule catch_threshold_violation {
+    select when sensor threshold_violation
+    pre {
+      msg = <<Threshold violation on #{event:attr("pico_name")}: #{event:attr("message")}>>
+    }
+    //prowl:notify("Threshold Violatoin", msg, priority=1) setting(resp);
+    twilio:send_sms(msg, sms_notification_number)
+  }
+
+  // sensor lifecycle management
   rule new_sensor {
     select when sensor initiation
     pre {
@@ -81,26 +100,7 @@ ruleset io.picolabs.sensor.community {
     }
   }
 
-// {
-//   "reading": 74.462,
-//   "name": "device_temperature",
-//   "sensor_id": "05951733-104c-45c5-99d5-1b646d061fce",
-//   "timestamp": 1679697222921,
-//   "pico_name": "lht65_test",
-//   "threshold": 60,
-//   "message": " threshold violation:  device_temperature is over threshold of 60 for dragino_lht65 "
-// }
-
-  rule catch_threshold_violation {
-    select when sensor threshold_violation
-    pre {
-      msg = <<Threshold violation on #{event:attr("pico_name")}: #{event:attr("message")}>>
-    }
-    //prowl:notify("Threshold Violatoin", msg, priority=1) setting(resp);
-    twilio:send_sms(msg, sms_notification_number)
-  }
-
-  rule sensor_initialization {
+rule sensor_initialization {
     select when wrangler new_child_created 
     foreach event:attr("url_rids") setting(rid)
       event:send(
@@ -115,8 +115,6 @@ ruleset io.picolabs.sensor.community {
      )
   }
 
-
-
   rule initialize_temperatures {
     select when sensor temperature_initiation
     foreach ctx:children setting(eci)
@@ -130,7 +128,7 @@ ruleset io.picolabs.sensor.community {
       }
   }
 
-  
+  // initialize this pico
   rule create_channels {
     select when wrangler ruleset_installed where event:attr("rids") >< ctx:rid
     foreach channels setting(channel)

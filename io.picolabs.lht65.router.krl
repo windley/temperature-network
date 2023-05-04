@@ -165,6 +165,7 @@ Received and decodes heartbeat information from a Dragino LHT65
       }
   }
 
+  // initialize this pico
   rule create_channels {
     select when wrangler ruleset_installed where event:attr("rids") >< ctx:rid
     foreach channels setting(channel)
