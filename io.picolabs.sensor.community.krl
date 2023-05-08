@@ -55,7 +55,7 @@ ruleset io.picolabs.sensor.community {
       children.map(function(child){
                       wrangler:picoQuery(child.get("eci"),
                                          "io.picolabs.lht65.router",
-                                         "lastTemperature")
+                                         "lastInternalTemp")
                       .head()
                    });
     };
