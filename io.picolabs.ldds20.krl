@@ -75,7 +75,7 @@ Received and decodes heartbeat information from a Dragino LDDS20 liquid level se
 // Size(bytes)    2       2           1           2         1
 // Value          BAT     Distance    Int         Temp      Sensor Flag
 //
-        payload_array = dragino:get_payload("ldds20", event:attrs{["payload"]})
+        payload_array = dragino:get_payload("ldds20", event:attrs{["payload"]}).klog("Payload data: ")
 
         battery_status = dragino:get_battery_status("ldds20", payload_array)
         battery_voltage = dragino:get_battery_value("ldds20", payload_array)
