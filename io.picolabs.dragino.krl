@@ -16,6 +16,7 @@ ruleset io.picolabs.dragino {
             decoded = math:base64decode(payload,"hex")
             split = (sensor == "lht65") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#) 
                   | (sensor == "lse01") => decoded.extract(re#(.{4})(.{4})(.{4})(.{4})(.{4})(.{2})#)
+                  | (sensor == "ldds20") => decoded.extract(re#(.{4})(.{4})(.{2})(.{4})(.{2})#)
                                          | []
             payload_array = split.map(function(x){x.as("Number")}) //.klog("Values")
             return payload_array
