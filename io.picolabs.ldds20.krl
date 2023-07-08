@@ -65,6 +65,7 @@ Received and decodes heartbeat information from a Dragino LDDS20 liquid level se
 // "payload":"DUcAAAAAAAE=" 3 in of water
 // "payload":"DTwAAAAAAAE=" 0.75 in
 // "payload":"DSwAAAAAAAE="
+// "payload":"DSUAAAAAAAE="
 
 
   rule process_heartbeat {
@@ -79,34 +80,20 @@ Received and decodes heartbeat information from a Dragino LDDS20 liquid level se
 
         battery_status = dragino:get_battery_status("ldds20", payload_array)
         battery_voltage = dragino:get_battery_value("ldds20", payload_array)
-        
-        temperature = dragino:cToF(dragino:fix_temperatures(payload_array[1])).klog("Temperature (F)")
-        humidity = (payload_array[2]/10).klog("Relative Humidity")
-        external_sensor = ((payload_array[3] == 0) => "None" 
-                          |(payload_array[3] == 1) => "Temperature" 
-                          |                           "Something else").klog("External Sensor")
-        probe_connected = (not (payload_array[4] == 32767)).klog("Probe connected?")
-        external_temp = dragino:cToF(dragino:fix_temperatures(payload_array[4])).klog("Temperature Probe (F)");
 
-        sensor_data = {"device_temperature": temperature,
-                       "humidity": humidity,
+        sensor_data = {"liquid_level": payload_array[1], // in mm
                        "battery_status": battery_status,
                        "battery_voltage": battery_voltage
                       };
 
-        readings = {"readings":  probe_connected => sensor_data.put({"probe_temperature": external_temp})
-                                                  | sensor_data,
-                    "probe_connected": probe_connected,
+        readings = {"readings":  sensor_data,
                     "sensor_type": "dragino_ldds20",
 	                  "sensor_id": event:attrs{["uuid"]},
                     "timestamp": event:attrs{["reported_at"]}
 	                 }
       }
       always {
-        ent:lastInternalTemp := temperature
-        ent:lastProbeTemp :=  external_temp
-        clear ent:lastProbeTemp if not (probe_connected)
-        ent:lastHumidity := humidity
+        ent:lastLiquidLevel := sensor_data{"liquid_level"}
 
       	raise sensor event "new_readings" attributes readings;       
 
