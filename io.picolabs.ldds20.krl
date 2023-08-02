@@ -62,10 +62,8 @@ Received and decodes heartbeat information from a Dragino LDDS20 liquid level se
     }
   }
 
-// "payload":"DUcAAAAAAAE=" 3 in of water
-// "payload":"DTwAAAAAAAE=" 0.75 in
-// "payload":"DSwAAAAAAAE="
-// "payload":"DSUAAAAAAAE="
+// 10g propane tank full (and warm): 557mm
+// after cooking steak (20 min): 537mm
 
 
   rule process_heartbeat {
