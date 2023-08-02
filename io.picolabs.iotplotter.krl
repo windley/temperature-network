@@ -56,11 +56,12 @@ ruleset io.picolabs.iotplotter {
     }
   }
 
+  // put the feed id in quotes when using the logging tab to ensure it's treated as a string
   rule save_config {
     select when sensor configuration
     pre {
-      feed_id = event:attr("iotplotter_feed_id").klog("Feed ID");
-      api_key = event:attr("iotplotter_api_key").klog("API Key");
+      feed_id = event:attr("iotplotter_feed_id");
+      api_key = event:attr("iotplotter_api_key");
     }
     if not (feed_id.isnull() || api_key.isnull()) then noop()
     fired {
