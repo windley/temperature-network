@@ -47,7 +47,7 @@ ruleset io.picolabs.iotplotter {
   rule send_data_to_IoTPlotter {
     select when sensor new_readings
 
-    send_payload((meta:rulesetConfig{["feed_id"]} || ent:feed_id),
+    send_payload((meta:rulesetConfig{["feed_id"]} || ent:feed_id.substr(0,-1)),
                  (meta:rulesetConfig{["api_key"]} || ent:api_key),
                  event:attrs) setting(resp)
    
@@ -56,7 +56,7 @@ ruleset io.picolabs.iotplotter {
     }
   }
 
-  // put the feed id in quotes when using the logging tab to ensure it's treated as a string
+  // put the feed id in quotes when using the testing tab to ensure it's treated as a string
   rule save_config {
     select when sensor configuration
     pre {
