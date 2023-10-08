@@ -44,7 +44,7 @@ ruleset io.picolabs.iotplotter {
 
     README = function() {
       return <<
-IoTPlotter feed_id's are just digits. The pico enginer UI will parse them as INTs unless you enclose them in strings
+IoTPlotter feed_id's are just digits. The pico enginer UI will parse them as INTs (using JSON.parse()) unless you enclose them in quotes (e.g. "367832564114515476")
       >>
     }
 
@@ -53,8 +53,6 @@ IoTPlotter feed_id's are just digits. The pico enginer UI will parse them as INT
   rule send_data_to_IoTPlotter {
     select when sensor new_readings
 
-    // IoTPlotter feed_id's are just digits. The pico enginer UI will parse them as INTs
-    // unless you enclose them in strings
     send_payload((meta:rulesetConfig{["feed_id"]} || ent:feed_id),
                  (meta:rulesetConfig{["api_key"]} || ent:api_key),
                  event:attrs) setting(resp)
