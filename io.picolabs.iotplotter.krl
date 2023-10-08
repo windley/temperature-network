@@ -47,7 +47,10 @@ ruleset io.picolabs.iotplotter {
   rule send_data_to_IoTPlotter {
     select when sensor new_readings
 
-    send_payload((meta:rulesetConfig{["feed_id"]} || ent:feed_id.substr(0,-1)),
+    // there is a bug that turns strings of numbers input via the UI to be treated as numbers
+    // even if they are strings. The workaround is to add a non-numeric character to the
+    // end of the feed_id to ensure it's viewed as a string, then remove it here. 
+    send_payload((meta:rulesetConfig{["feed_id"]} || ent:feed_id),
                  (meta:rulesetConfig{["api_key"]} || ent:api_key),
                  event:attrs) setting(resp)
    
