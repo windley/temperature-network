@@ -8,7 +8,7 @@ ruleset io.picolabs.iotplotter {
 
     use module io.picolabs.wrangler alias wrangler
 
-    shares show_configuration
+    shares show_configuration, README
 
   }
 
@@ -42,14 +42,19 @@ ruleset io.picolabs.iotplotter {
               "feed_id": ent:feed_id.klog("Feed ID retrieved: ")}
     }
 
+    README = function() {
+      return <<
+IoTPlotter feed_id's are just digits. The pico enginer UI will parse them as INTs unless you enclose them in strings
+      >>
+    }
+
   }
 
   rule send_data_to_IoTPlotter {
     select when sensor new_readings
 
-    // there is a bug that turns strings of numbers input via the UI to be treated as numbers
-    // even if they are strings. The workaround is to add a non-numeric character to the
-    // end of the feed_id to ensure it's viewed as a string, then remove it here. 
+    // IoTPlotter feed_id's are just digits. The pico enginer UI will parse them as INTs
+    // unless you enclose them in strings
     send_payload((meta:rulesetConfig{["feed_id"]} || ent:feed_id),
                  (meta:rulesetConfig{["api_key"]} || ent:api_key),
                  event:attrs) setting(resp)
