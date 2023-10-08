@@ -39,7 +39,7 @@ ruleset io.picolabs.iotplotter {
 
     show_configuration = function() {
       return {"api_key": ent:api_key,
-              "feed_id": ent:feed_id}
+              "feed_id": ent:feed_id.klog("Feed ID retrieved: ")}
     }
 
   }
@@ -60,13 +60,13 @@ ruleset io.picolabs.iotplotter {
   rule save_config {
     select when sensor configuration
     pre {
-      feed_id = event:attr("iotplotter_feed_id");
+      feed_id = event:attr("iotplotter_feed_id").klog("Feed ID input: ");
       api_key = event:attr("iotplotter_api_key");
     }
     if not (feed_id.isnull() || api_key.isnull()) then noop()
     fired {
       log info "Configuring IoT Plotter";
-      ent:feed_id := feed_id;
+      ent:feed_id := feed_id.klog("Feed ID saved: ");
       ent:api_key := api_key;
     }
   }
