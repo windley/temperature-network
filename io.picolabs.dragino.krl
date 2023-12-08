@@ -20,7 +20,7 @@ ruleset io.picolabs.dragino {
                   | (sensor == "lsn50") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#)
                   | []
             payload_array = split.map(function(x){x.as("Number")}).klog("Values")
-            return payload_array
+            return payload_array 
         }
         get_battery_status = function(sensor, payload){
             // sensor unused unless battery status is in different places on different sensor types
