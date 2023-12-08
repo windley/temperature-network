@@ -76,8 +76,8 @@ Received and decodes heartbeat information from a Dragino LSN50
 // Payload array for LSN50
 // Array index    0       1           2           3         4       5        
 // Size(bytes)    2       2           2           1         2       2
-// Value          BAT     Temp01      ADC         Digital   Temp02  Temp03
-//                                                Input
+// Value          BAT     Temp01      Ignore      Alarm     Temp02  Temp03
+//                                                Flag
 //
 
         payload_array = dragino:get_payload("lsn50", event:attrs{["payload"]})
