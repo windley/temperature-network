@@ -1,4 +1,4 @@
-ruleset io.picolabs.lht65.router {
+ruleset io.picolabs.lsn50.router {
   meta {
     name "LSN50_device"
     description <<
@@ -35,7 +35,7 @@ Received and decodes heartbeat information from a Dragino LSN50
          "allow": [ { "rid": "*", "name": "*" } ],
          "deny": []
        }
-     }];
+     }]; 
 
     // API functions
     lastHeartbeat = function() {
