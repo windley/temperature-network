@@ -45,7 +45,7 @@ ruleset io.picolabs.iotplotter {
     README = function() {
       return <<
 IoTPlotter feed_id's are just digits. The pico enginer UI will parse them as INTs (using JSON.parse()) unless you enclose them in quotes (e.g. "367832564114515476")
-      >>
+>>
     }
 
   }
