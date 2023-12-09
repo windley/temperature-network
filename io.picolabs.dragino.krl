@@ -10,7 +10,12 @@ ruleset io.picolabs.dragino {
     global {
 
         cToF = function(c){math:int(c*180+3200)/100}; // two decimal places
-        fix_temperatures = function(x){math:int(x < 32768 => x | x-65536)/100}; 
+        
+        fix_temperatures = function(x, sensor = "lht65") {
+            divisor = (sensor == "lsn50") => 10
+                    | 100
+            math:int(x < 32768 => x | x-65536)/divisor
+        }; 
 
         get_payload = function(sensor, payload){
             decoded = math:base64decode(payload,"hex").klog("Decoded")
