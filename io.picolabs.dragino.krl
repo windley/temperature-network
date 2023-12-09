@@ -13,7 +13,7 @@ ruleset io.picolabs.dragino {
         fix_temperatures = function(x){math:int(x < 32768 => x | x-65536)/100}; 
 
         get_payload = function(sensor, payload){
-            decoded = math:base64decode(payload,"hex") //.klog("Decoded")
+            decoded = math:base64decode(payload,"hex").klog("Decoded")
             split = (sensor == "lht65") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#) 
                   | (sensor == "lse01") => decoded.extract(re#(.{4})(.{4})(.{4})(.{4})(.{4})(.{2})#)
                   | (sensor == "ldds20") => decoded.extract(re#(.{4})(.{4})(.{2})(.{4})(.{2})#)
