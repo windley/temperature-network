@@ -54,6 +54,8 @@ Received and decodes heartbeat information from a Dragino LSN50
       ent:lastTemperature_03
     }
 
+    expected_payload_size = 11
+
         
   }
 
@@ -102,6 +104,7 @@ Received and decodes heartbeat information from a Dragino LSN50
                     "timestamp": event:attrs{["reported_at"]}
 	                 }
       }
+      if(event:attr{"payload_size"} == expected_payload_size) then noop()
       always {
         ent:lastTemperature_01 := temperature_01
         ent:lastTemperature_02 := temperature_02
