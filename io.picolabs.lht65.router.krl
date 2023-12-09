@@ -40,7 +40,7 @@ Received and decodes heartbeat information from a Dragino LHT65
     // API functions
     lastHeartbeat = function() {
       ent:lastHeartbeat.klog("Return value ")
-    }
+    } 
 
     lastHumidity = function() {
       ent:lastHumidity
