@@ -67,7 +67,7 @@ Received and decodes heartbeat information from a Dragino LSN50
       heartbeat = event:attrs{"payload"} => event:attrs | {}
 
     }
-    if(event:attr{"payload_size"} == expected_payload_size) then noop()
+    if(event:attr{"payload_size"}.klog("ps") == expected_payload_size) then noop()
     fired {
       ent:lastHeartbeat := heartbeat;
     }
