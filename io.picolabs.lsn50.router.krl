@@ -68,7 +68,7 @@ Received and decodes heartbeat information from a Dragino LSN50
 
     }
     if(event:attr{"payload_size"} == expected_payload_size) then noop()
-    always {
+    fired {
       ent:lastHeartbeat := heartbeat;
     }
   }
@@ -88,9 +88,9 @@ Received and decodes heartbeat information from a Dragino LSN50
         battery_status = dragino:get_battery_status("lsn50", payload_array)
         battery_voltage = dragino:get_battery_value("lsn50", payload_array)
         
-        temperature_01 = dragino:cToF(dragino:fix_temperatures(payload_array[1], "lsn50").klog("Temperature (C)")).klog("Temperature (F)")
-        temperature_02 = dragino:cToF(dragino:fix_temperatures(payload_array[4]), "lsn50").klog("Temperature (F)")
-        temperature_03 = dragino:cToF(dragino:fix_temperatures(payload_array[5]), "lsn50").klog("Temperature (F)")
+        temperature_01 = dragino:cToF(dragino:fix_temperatures(payload_array[1], "lsn50")).klog("Temperature (F)")
+        temperature_02 = dragino:cToF(dragino:fix_temperatures(payload_array[4], "lsn50")).klog("Temperature (F)")
+        temperature_03 = dragino:cToF(dragino:fix_temperatures(payload_array[5], "lsn50")).klog("Temperature (F)")
 
         sensor_data = {"temperature_01": temperature_01,
                        "temperature_02": temperature_02,
@@ -106,7 +106,7 @@ Received and decodes heartbeat information from a Dragino LSN50
 	                 }
       }
       if(event:attr{"payload_size"} == expected_payload_size) then noop()
-      always {
+      fired {
         ent:lastTemperature_01 := temperature_01
         ent:lastTemperature_02 := temperature_02
         ent:lastTemperature_03 := temperature_03
