@@ -67,7 +67,7 @@ Received and decodes heartbeat information from a Dragino LSN50
       heartbeat = event:attrs{"payload"} => event:attrs | {}
 
     }
-    if(event:attrs{"payload_size"}.klog("ps") == expected_payload_size) then noop()
+    if(event:attrs{"payload_size"} == expected_payload_size) then noop()
     fired {
       ent:lastHeartbeat := heartbeat;
     }
@@ -81,7 +81,7 @@ Received and decodes heartbeat information from a Dragino LSN50
 // Size(bytes)    2       2           2           1         2       2
 // Value          BAT     Temp01      Ignore      Alarm     Temp02  Temp03
 //                                                Flag
-//
+// http://wiki.dragino.com/xwiki/bin/view/Main/User%20Manual%20for%20LoRaWAN%20End%20Nodes/LSN50v2-D20-D22-D23%20LoRaWAN%20Temperature%20Sensor%20User%20Manual/
 
         payload_array = dragino:get_payload("lsn50", event:attrs{["payload"]})
 
