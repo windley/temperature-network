@@ -88,7 +88,8 @@ Received and decodes heartbeat information from a Dragino LSN50
         // lsn50 doesn't support battery status
         // battery_status = dragino:get_battery_status("lsn50", payload_array)
         battery_voltage = dragino:get_battery_value("lsn50", payload_array)
-        
+
+	// I don't know if color assignments are consistent on the LSN50 since they're not mentioned in the docs
         temperature_01 = dragino:cToF(dragino:fix_temperatures(payload_array[1], "lsn50")).klog("Temperature (F)") // white
         temperature_02 = dragino:cToF(dragino:fix_temperatures(payload_array[4], "lsn50")).klog("Temperature (F)") // red
         temperature_03 = dragino:cToF(dragino:fix_temperatures(payload_array[5], "lsn50")).klog("Temperature (F)") // black
@@ -101,7 +102,7 @@ Received and decodes heartbeat information from a Dragino LSN50
 
         readings = {"readings":  sensor_data,
                     "sensor_type": "dragino_lsn50",
-	                  "sensor_id": event:attrs{["uuid"]},
+		    "sensor_id": event:attrs{["uuid"]},
                     "timestamp": event:attrs{["reported_at"]}
 	                 }
       }
