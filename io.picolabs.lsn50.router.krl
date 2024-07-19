@@ -85,23 +85,24 @@ Received and decodes heartbeat information from a Dragino LSN50
 
         payload_array = dragino:get_payload("lsn50", event:attrs{["payload"]})
 
-        battery_status = dragino:get_battery_status("lsn50", payload_array)
+        // lsn50 doesn't support battery status
+        // battery_status = dragino:get_battery_status("lsn50", payload_array)
         battery_voltage = dragino:get_battery_value("lsn50", payload_array)
-        
-        temperature_01 = dragino:cToF(dragino:fix_temperatures(payload_array[1], "lsn50")).klog("Temperature (F)")
-        temperature_02 = dragino:cToF(dragino:fix_temperatures(payload_array[4], "lsn50")).klog("Temperature (F)")
-        temperature_03 = dragino:cToF(dragino:fix_temperatures(payload_array[5], "lsn50")).klog("Temperature (F)")
 
-        sensor_data = {"temperature_01": temperature_01,
-                       "temperature_02": temperature_02,
-                       "temperature_03": temperature_03,
-                       "battery_status": battery_status,
+	// I don't know if color assignments are consistent on the LSN50 since they're not mentioned in the docs
+        temperature_01 = dragino:cToF(dragino:fix_temperatures(payload_array[1], "lsn50")).klog("Temperature (F)") // white
+        temperature_02 = dragino:cToF(dragino:fix_temperatures(payload_array[4], "lsn50")).klog("Temperature (F)") // red
+        temperature_03 = dragino:cToF(dragino:fix_temperatures(payload_array[5], "lsn50")).klog("Temperature (F)") // black
+
+        sensor_data = {"white_probe": temperature_01,
+                       "red_probe": temperature_02,
+                       "black_probe": temperature_03,
                        "battery_voltage": battery_voltage
                       };
 
         readings = {"readings":  sensor_data,
                     "sensor_type": "dragino_lsn50",
-	                  "sensor_id": event:attrs{["uuid"]},
+		    "sensor_id": event:attrs{["uuid"]},
                     "timestamp": event:attrs{["reported_at"]}
 	                 }
       }
