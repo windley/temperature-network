@@ -1,9 +1,11 @@
 ruleset io.picolabs.wl03a-lb.router {
   meta {
     name "WL03A-LB_device"
+    
     description <<
 Received and decodes heartbeat information from a Dragino WL03A-LB Leak Detector
 >>
+
     author "PJW"
 
     use module io.picolabs.wrangler alias wrangler
