@@ -41,13 +41,14 @@ ruleset io.picolabs.sensor.community {
     }
 
     // don't add .krl extension
-    rids_to_install = {"lht65": ["io.picolabs.lht65.router"],
-                       "lse01": ["io.picolabs.lse01.router"],
-                       "lsn50": ["io.picolabs.lsn50.router"],
-                       "all":   ["io.picolabs.sensor.thresholds",
-                                 "io.picolabs.iotplotter",
-                                 "io.picolabs.dragino"
-                                ]
+    rids_to_install = {"lht65":    ["io.picolabs.lht65.router"],
+                       "lse01":    ["io.picolabs.lse01.router"],
+                       "lsn50":    ["io.picolabs.lsn50.router"],
+                       "wl03a-lb": ["io.picolabs.wl03a-lb.router"],
+                       "all":      ["io.picolabs.sensor.thresholds",
+                                    "io.picolabs.iotplotter",
+                                    "io.picolabs.dragino"
+                                   ]
                      };
 
 
