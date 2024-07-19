@@ -19,9 +19,9 @@ Received and decodes heartbeat information from a Dragino WL03A-LB Leak Detector
   global {
 
     channels = [
-      {"tags": ["wl03a-lb", "sensor"],
+      {"tags": ["wl03a_lb", "sensor"],
        "eventPolicy": {
-         "allow": [ { "domain": "wl03a-lb", "name": "*" }, ],
+         "allow": [ { "domain": "wl03a_lb", "name": "*" }, ],
         "deny": []
         },
        "queryPolicy": {
