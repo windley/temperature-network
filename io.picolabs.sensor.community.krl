@@ -44,7 +44,7 @@ ruleset io.picolabs.sensor.community {
     rids_to_install = {"lht65":    ["io.picolabs.lht65.router"],
                        "lse01":    ["io.picolabs.lse01.router"],
                        "lsn50":    ["io.picolabs.lsn50.router"],
-                       "wl03a-lb": ["io.picolabs.wl03a-lb.router"],
+                       "wl03a_lb": ["io.picolabs.wl03a_lb.router"],
                        "all":      ["io.picolabs.sensor.thresholds",
                                     "io.picolabs.iotplotter",
                                     "io.picolabs.dragino"
