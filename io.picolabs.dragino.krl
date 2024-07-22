@@ -23,8 +23,8 @@ ruleset io.picolabs.dragino {
                   | (sensor == "lse01") => decoded.extract(re#(.{4})(.{4})(.{4})(.{4})(.{4})(.{2})#)
                   | (sensor == "ldds20") => decoded.extract(re#(.{4})(.{4})(.{2})(.{4})(.{2})#)
                   | (sensor == "lsn50") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#)
-                  | (sensor == "wl03a-lb-status") => decoded.extract(re#(.{2})(.{4})(.{2})(.{2})(.{4})#)
-                  | (sensor == "wl03a-lb-data") => decoded.extract(re#(.{2})(.{6})(.{6})(.{8})#)
+                  | (sensor == "wl03a_lb_status") => decoded.extract(re#(.{2})(.{4})(.{2})(.{2})(.{4})#)
+                  | (sensor == "wl03a_lb_data") => decoded.extract(re#(.{2})(.{6})(.{6})(.{8})#)
                   | []
             payload_array = split.map(function(x){x.as("Number")}) // .klog("Values") 
             return payload_array 
