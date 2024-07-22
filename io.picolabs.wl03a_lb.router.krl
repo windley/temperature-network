@@ -85,8 +85,8 @@ Received and decodes heartbeat information from a Dragino WL03A-LB Leak Detector
 //
         payload = event:attrs{["payload"]};
         payload_size = event:attrs{["payload_size"]}.klog("Payload size: "); 
-        payload_array = (payload_size == 14) => dragino:get_payload("wl03a_lb_status", payload).klog("Payload status: ")
-                      | (payload_size == 22) => dragino:get_payload("wl03a_lb_data", payload).klog("Payload data: ")
+        payload_array = (payload_size == 7) => dragino:get_payload("wl03a_lb_status", payload).klog("Payload status: ")
+                      | (payload_size == 11) => dragino:get_payload("wl03a_lb_data", payload).klog("Payload data: ")
                       | []
 
         battery_status = dragino:get_battery_status("ldds20", payload_array)
