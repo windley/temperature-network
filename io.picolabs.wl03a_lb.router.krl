@@ -86,7 +86,7 @@ Received and decodes heartbeat information from a Dragino WL03A-LB Leak Detector
 // Manual: http://wiki.dragino.com/xwiki/bin/view/Main/User%20Manual%20for%20LoRaWAN%20End%20Nodes/WL03A-LB_LoRaWAN_None-Position_Rope_Type_Water_Leak_Controller_User_Manual/  
 //
         payload = event:attrs{["payload"]};
-        payload_size = event:attrs{["payload_size"]}.klog("Payload size: "); 
+        payload_size = event:attrs{["payload_size"]} //.klog("Payload size: "); 
         payload_array = (payload_size == 7) => dragino:get_payload("wl03a_lb_status", payload).klog("Payload status: ")
                       | (payload_size == 11) => dragino:get_payload("wl03a_lb_data", payload).klog("Payload data: ")
                       | []
