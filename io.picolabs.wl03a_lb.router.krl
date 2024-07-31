@@ -83,28 +83,44 @@ Received and decodes heartbeat information from a Dragino WL03A-LB Leak Detector
 // Value          Status  Total Leak  Last Leak   Unix 
 //                Alarm   Evemts      Duration    Timestamp
 //
+// Manual: http://wiki.dragino.com/xwiki/bin/view/Main/User%20Manual%20for%20LoRaWAN%20End%20Nodes/WL03A-LB_LoRaWAN_None-Position_Rope_Type_Water_Leak_Controller_User_Manual/  
+//
         payload = event:attrs{["payload"]};
         payload_size = event:attrs{["payload_size"]}.klog("Payload size: "); 
         payload_array = (payload_size == 7) => dragino:get_payload("wl03a_lb_status", payload).klog("Payload status: ")
                       | (payload_size == 11) => dragino:get_payload("wl03a_lb_data", payload).klog("Payload data: ")
                       | []
 
-        battery_status = dragino:get_battery_status("ldds20", payload_array)
-        battery_voltage = dragino:get_battery_value("ldds20", payload_array)
+    }
+    always {
+       raise sensor event "new_status" attributes {"status": payload_array} if payload_size == 7
+       raise sensor event "new_data" attributes {"data": payload_array} if payload_size == 11
+    }
+}
 
-        sensor_data = {"liquid_level": payload_array[1], // in mm
-                       "battery_status": battery_status,
-                       "battery_voltage": battery_voltage
+  rule process_leak_data {
+      select when sensor new_data
+      pre {
+        data_array = event:attrs{["data"]}
+        leak = data_array[0].bxor(1).klog("Leak?");
+        alarm = data_array[0].bxor(2).klog("Alarm?");
+        tdc = data_array[0].bxor(4).klog("TDC?");
+        leak_events = data_array[1];
+        leak_duration = data_array[2];
+
+        
+        sensor_data = { "leak": data_array[0].bxor(1).klog("Leak?"),
+                        "alarm": data_array[0].bxor(2).klog("Alarm?"),
+                        "tdc": data_array[0].bxor(4).klog("TDC?"),
+                        "leak_events": data_array[1].klog("Leak events?"),
+                        "leak_duration": data_array[2].klog("Duration")
                       };
 
         readings = {"readings":  sensor_data,
-                    "sensor_type": "dragino_wl03a_lb",
-	                  "sensor_id": event:attrs{["uuid"]},
                     "timestamp": event:attrs{["reported_at"]}
 	                 }
       }
       always {
-        ent:lastLiquidLevel := sensor_data{"liquid_level"}
 
       	raise sensor event "new_readings" attributes readings;       
 
