@@ -93,8 +93,12 @@ Received and decodes heartbeat information from a Dragino WL03A-LB Leak Detector
 
     }
     always {
-       raise sensor event "new_status" attributes {"status": payload_array} if payload_size == 7
-       raise sensor event "new_data" attributes {"data": payload_array} if payload_size == 11
+       raise sensor event "new_status" attributes
+             {"status": payload_array,
+              "reported_at": event:attrs{["reported_at"]}} if payload_size == 7
+       raise sensor event "new_data" attributes
+             {"data": payload_array,
+              "reported_at": event:attrs{["reported_at"]}} if payload_size == 11
     }
 }
 
