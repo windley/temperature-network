@@ -101,17 +101,12 @@ Received and decodes heartbeat information from a Dragino WL03A-LB Leak Detector
   rule process_leak_data {
       select when sensor new_data
       pre {
-        data_array = event:attrs{["data"]}
-        leak = data_array[0].bxor(1).klog("Leak?");
-        alarm = data_array[0].bxor(2).klog("Alarm?");
-        tdc = data_array[0].bxor(4).klog("TDC?");
-        leak_events = data_array[1];
-        leak_duration = data_array[2];
 
+        data_array = event:attrs{["data"]}
         
-        sensor_data = { "leak": data_array[0].bxor(1).klog("Leak?"),
-                        "alarm": data_array[0].bxor(2).klog("Alarm?"),
-                        "tdc": data_array[0].bxor(4).klog("TDC?"),
+        sensor_data = { "leak": data_array[0].bxor("1").klog("Leak?"),
+                        "alarm": data_array[0].bxor("2").klog("Alarm?"),
+                        "tdc": data_array[0].bxor("4").klog("TDC?"),
                         "leak_events": data_array[1].klog("Leak events?"),
                         "leak_duration": data_array[2].klog("Duration")
                       };
