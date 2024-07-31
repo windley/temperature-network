@@ -106,15 +106,15 @@ Received and decodes heartbeat information from a Dragino WL03A-LB Leak Detector
       select when sensor new_data
       pre {
 
-        data_array = event:attrs{["data"]}.klog("data array")
+        data_array = event:attrs{["data"]} //.klog("data array")
         status = data_array[0].as("Hex")
         
-        sensor_data = { "leak": status.band("1").klog("Leak?"),
-                        "alarm": status.band("2").klog("Alarm?"),
-                        "tdc": status.band("4").klog("TDC?"),
-                        "leak_events": data_array[1].klog("Leak events?"),
-                        "leak_duration": data_array[2].klog("Duration") // sec
-                      };
+        sensor_data = { "leak": status.band("1"),
+                        "alarm": status.band("2"),
+                        "tdc": status.band("4"),
+                        "leak_events": data_array[1],
+                        "leak_duration": data_array[2] // sec
+                      }.klog("Sensor data: ");
 
         readings = {"readings":  sensor_data,
                     "timestamp": event:attr("reported_at")
