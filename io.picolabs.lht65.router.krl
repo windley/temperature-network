@@ -9,7 +9,7 @@ Received and decodes heartbeat information from a Dragino LHT65
     use module io.picolabs.wrangler alias wrangler
     use module io.picolabs.dragino alias dragino
 
-    share lastHeartbeat, lastHumidity, lastInternalTemp, lastProbeTemp
+    shares lastHeartbeat, lastHumidity, lastInternalTemp, lastProbeTemp
 
   }
 
