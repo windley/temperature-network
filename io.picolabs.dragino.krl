@@ -18,7 +18,7 @@ ruleset io.picolabs.dragino {
         }; 
 
         get_payload = function(sensor, payload){
-            decoded = math:base64decode(payload,"hex") //.klog("Decoded")
+            decoded = math:base64decode(payload,"hex").klog("Decoded")
             split = (sensor == "lht65") => decoded.extract(re#(.{4})(.{4})(.{4})(.{2})(.{4})(.{4})#) 
                   | (sensor == "lse01") => decoded.extract(re#(.{4})(.{4})(.{4})(.{4})(.{4})(.{2})#)
                   | (sensor == "ldds20") => decoded.extract(re#(.{4})(.{4})(.{2})(.{4})(.{2})#)
@@ -26,7 +26,7 @@ ruleset io.picolabs.dragino {
                   | (sensor == "wl03a_lb_status") => decoded.extract(re#(.{2})(.{4})(.{2})(.{2})(.{4})#)
                   | (sensor == "wl03a_lb_data") => decoded.extract(re#(.{2})(.{6})(.{6})(.{8})#)
                   | []
-            payload_array = split.map(function(x){x.as("Number")}) // .klog("Values") 
+            payload_array = split.map(function(x){x.as("Number")}).klog("Values") 
             return payload_array 
         }
 
