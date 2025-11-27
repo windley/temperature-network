@@ -127,7 +127,7 @@ Received and decodes heartbeat information from a Dragino LHT65
 //
 // First 6 bytes: has fix meanings for every device.
 // The 7th byte (EXT #): defines the external sensor model. (0 if missing, 1 for temperature)
-        payload_array = dragino:get_payload("lht65", event:attrs{["payload"]})
+        payload_array = dragino:get_payload("lht65", event:attrs{["payload"]}).klog("Payload array")
 
         battery_status = dragino:get_battery_status("lht65", payload_array)
         battery_voltage = dragino:get_battery_value("lht65", payload_array)
