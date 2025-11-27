@@ -5,6 +5,7 @@ ruleset io.picolabs.dragino {
         author "PJW"
         version "0.1.1"
         provides get_payload, cToF, fix_temperatures, get_battery_status, get_battery_value
+        shares get_payload
     }
 
     global {
