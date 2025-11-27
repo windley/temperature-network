@@ -27,7 +27,7 @@ ruleset io.picolabs.dragino {
                   | (sensor == "wl03a_lb_status") => decoded.extract(re#(.{2})(.{4})(.{2})(.{2})(.{4})#)
                   | (sensor == "wl03a_lb_data") => decoded.extract(re#(.{2})(.{6})(.{6})(.{8})#)
                   | []
-            payload_array = split.map(function(x){x.as("Number")}).klog("Values") 
+            payload_array = split.map(function(x){x.klog("Hex Values").as("Number")}).klog("Values") 
             return payload_array 
         }
 
