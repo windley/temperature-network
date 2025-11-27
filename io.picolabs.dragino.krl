@@ -39,7 +39,7 @@ ruleset io.picolabs.dragino {
         }
         get_battery_value = function(sensor, payload){
             // sensor unused unless battery status is in different places on different sensor types
-            payload[0].band("3FFF").klog("Battery voltage (mV)")
+            payload[0].band("0x3FFF").klog("Battery voltage (mV)")
         }
     }
 }
