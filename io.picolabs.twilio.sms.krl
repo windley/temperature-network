@@ -59,5 +59,13 @@ ruleset io.picolabs.twilio.sms {
       ent:from_number := from_number;
     }
   }
+
+  rule test_config {
+    select when twilio test
+    send_sms(<<Test message from event:attr("msg")>>, "8013625611")
+    always {
+      log info "Test message sent"
+    }
+  }
   
 }
