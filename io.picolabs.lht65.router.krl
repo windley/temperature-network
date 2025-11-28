@@ -170,10 +170,11 @@ Received and decodes heartbeat information from a Dragino LHT65
       select when sensor new_readings
       pre {
         community = wrangler:parent_eci();
+        readings = event:attr();
       }
       every {
-        send_directive("Routing to community", community, event:attr())
-        event:send({"eci": community, "domain":"sensor", "type": event:type(), "attrs": event:attr()});
+        send_directive("Routing to community", community, readings)
+        event:send({"eci": community, "domain":"sensor", "type": event:type(), "attrs": readings});
       }
     }
 
