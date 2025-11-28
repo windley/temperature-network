@@ -37,7 +37,8 @@ ruleset io.picolabs.twilio.sms {
                 "From":from,
                 "To":to,
                 "Body":message
-            });
+            }) setting (resp);
+        return resp
     };
   }
 
