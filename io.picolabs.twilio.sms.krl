@@ -46,7 +46,7 @@ ruleset io.picolabs.twilio.sms {
     pre {
       auth_token = event:attr("twilio_auth_token")
       account_sid = event:attr("twilio_account_sid")
-      from_number = event:attr("twilio_from_number")
+      from_number = event:attr("twilio_from_number") // number twilio gives you in E.164 format
     }
     if not (auth_token.isnull() 
           || account_sid.isnull() 
@@ -60,7 +60,7 @@ ruleset io.picolabs.twilio.sms {
     }
   }
 
-  // to use create a channel that allows the twilio domain
+  // to use create a channel that allows the twilio domain; delete channel when done testing for security
   rule test_config {
     select when twilio test
     pre {
