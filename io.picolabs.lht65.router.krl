@@ -165,6 +165,19 @@ Received and decodes heartbeat information from a Dragino LHT65
       }
   }
 
+    // meant to generally route events to sensor community. Extend eventex to choose what gets routed
+    rule route_to_community {
+      select when sensor new_readings
+      pre {
+        community = wrangler:parent_eci();
+      }
+      every {
+        send_directive("Routing to community", community, event:attr())
+        event:send({"eci": community, "domain":"sensor", "type": event:type(), "attrs": event:attr()});
+      }
+    }
+
+
   // initialize this pico
   rule create_channels {
     select when wrangler ruleset_installed where event:attr("rids") >< ctx:rid
