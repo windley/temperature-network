@@ -59,10 +59,11 @@ ruleset io.picolabs.sensor.community {
                      temperature = wrangler:picoQuery(child.get("eci"),
                                                       "io.picolabs.lht65.router",
                                                       "lastInternalTemp").head()
-                     temperature
-//                     {"name": name,
-//                      "lastTemperature": temperature
-//                     }
+//                    temperature
+                     flip = {"name": name,
+                      "lastTemperature": temperature
+                     }
+                     flip
                    });
     };
 
