@@ -60,12 +60,13 @@ ruleset io.picolabs.twilio.sms {
     }
   }
 
+  // to use create a channel that allows the twilio domain
   rule test_config {
     select when twilio test
     pre {
-      msg = <<Test message from event:attr("msg")>>
+      msg = event:attr("msg")
     }
-    send_sms(msg, "8013625611") setting(resp)
+    send_sms(<<Test message:  msg>>, "+18013625611") setting(resp)
     always {
       log info "Test message sent: " + resp
     }
