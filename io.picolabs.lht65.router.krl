@@ -152,7 +152,7 @@ Received and decodes heartbeat information from a Dragino LHT65
                     "sensor_type": "dragino_lht65",
 	                  "sensor_id": event:attrs{["uuid"]},
                     "timestamp": event:attrs{["reported_at"]},
-                    "sensor_name": event:attrs{["payload"]}
+                    "sensor_name": event:attrs{["name"]}
 	                 }
       }
       always {
