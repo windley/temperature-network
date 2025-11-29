@@ -68,19 +68,19 @@ ruleset io.picolabs.sensor.community {
 
     enqueue = function(array, new_element, len=10) {
       cur_len = array.length();
-      new_array = cur_len >= 10 => array.splice(len-1, cur_len -len)
+      new_array = cur_len >= 10 => array.splice(len-1, (cur_len - len) + 1)
                                  | array;
       new_element.append(new_array.klog("new array"))
     }
 
     test_enqueue = function() {
       a_s = [0,1,2,3,4,5,6,7,8,9,10,11,12];
-      new_a_s = a_s.enqueue(15).klog("one item on 13 element array")
+      new_a_s = a_s.enqueue(15).klog("one item on 13 element array, [15,0,1,2,3,4,5,6,7,8]")
       b_s = [0,1,2,3,4,5];
-      new_b_s = b_s.enqueue(10).klog("one iterm on short array")
+      new_b_s = b_s.enqueue(10).klog("one iterm on short array, [10,0,1,2,3,4,5]")
       c_s = [0,1,2,3,4,5,6,7,8,9];
-      new_c_s = c_s.enqueue(25).klog("one item on 10 element array with default")
-      new_c_s_2 = c_s.enqueue(55, 5).klog("one item on 10 element array with length set to 5")
+      new_c_s = c_s.enqueue(25).klog("one item on 10 element array with default, [25,0,1,2,3,4,5,6,7,8]")
+      new_c_s_2 = c_s.enqueue(55, 5).klog("one item on 10 element array with length set to 5, [55,0,1,2,3]")
       10
     }
 
