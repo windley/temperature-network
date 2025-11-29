@@ -16,7 +16,7 @@ ruleset io.picolabs.sensor.community {
     shares
       test_enqueue,
       children,
-      temperatures,
+      readings,
       lastTemperatures
       
     //provides 
@@ -85,7 +85,7 @@ ruleset io.picolabs.sensor.community {
       "testing done, check logs"
     }
 
-    temperatures = function() {
+    readings = function() {
       ent:sensor_readings
     }
     
