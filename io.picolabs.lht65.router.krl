@@ -151,7 +151,8 @@ Received and decodes heartbeat information from a Dragino LHT65
                     "probe_connected": probe_connected,
                     "sensor_type": "dragino_lht65",
 	                  "sensor_id": event:attrs{["uuid"]},
-                    "timestamp": event:attrs{["reported_at"]}
+                    "timestamp": event:attrs{["reported_at"]},
+                    "sensor_name": event:attrs{["payload"]}
 	                 }
       }
       always {
