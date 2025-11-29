@@ -14,9 +14,10 @@ ruleset io.picolabs.sensor.community {
                                                         auth_token = meta:rulesetConfig{["twilio_auth_token"]}
    
     shares
+      test_enqueue,
       children,
       temperatures,
-      test_enqueue
+      lastTemperatures
       
     //provides 
   }
@@ -53,7 +54,7 @@ ruleset io.picolabs.sensor.community {
                      };
 
 
-    temperatures = function() {
+    lastTemperatures = function() {
       children = wrangler:children();
       children.map(function(child){
                      temperature = wrangler:picoQuery(child.get("eci"),
@@ -83,6 +84,11 @@ ruleset io.picolabs.sensor.community {
       new_c_s_2 = c_s.enqueue(55, 5).klog("one item on 10 element array with length set to 5, should be [55,0,1,2,3]; is ")
       "testing done, check logs"
     }
+
+    temperatures = function() {
+      ent:sensor_readings
+    }
+    
 
   }
 
