@@ -15,7 +15,7 @@ ruleset io.picolabs.sensor.community {
    
     shares
       test_push,
-      children,
+      children, 
       readings,
       lastTemperatures
       
