@@ -85,8 +85,9 @@ ruleset io.picolabs.sensor.community {
       "testing done, check logs"
     }
 
-    readings = function() {
-      ent:sensor_readings
+    readings = function(name) {
+      name => ent:sensor_readings{name}
+            | ent:sensor_readings
     }
     
 
