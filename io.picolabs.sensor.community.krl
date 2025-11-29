@@ -14,7 +14,7 @@ ruleset io.picolabs.sensor.community {
                                                         auth_token = meta:rulesetConfig{["twilio_auth_token"]}
    
     shares
-      test_enqueue,
+      test_push,
       children,
       readings,
       lastTemperatures
@@ -67,21 +67,21 @@ ruleset io.picolabs.sensor.community {
                    });
     };
 
-    enqueue = function(array, new_element, len=10) {
+    push = function(array, new_element, len=10) {
       cur_len = array.length();
       new_array = cur_len >= 10 => array.splice(len-1, (cur_len - len) + 1)
                                  | array;
       new_element.append(new_array.klog("new array"))
     }
 
-    test_enqueue = function() {
+    test_push = function() {
       a_s = [0,1,2,3,4,5,6,7,8,9,10,11,12];
-      new_a_s = a_s.enqueue(15).klog("one item on 13 element array, should be [15,0,1,2,3,4,5,6,7,8]; is ")
+      new_a_s = a_s.push(15).klog("one item on 13 element array, should be [15,0,1,2,3,4,5,6,7,8]; is ")
       b_s = [0,1,2,3,4,5];
-      new_b_s = b_s.enqueue(10).klog("one iterm on short array, should be [10,0,1,2,3,4,5]; is ")
+      new_b_s = b_s.push(10).klog("one iterm on short array, should be [10,0,1,2,3,4,5]; is ")
       c_s = [0,1,2,3,4,5,6,7,8,9];
-      new_c_s = c_s.enqueue(25).klog("one item on 10 element array with default, should be [25,0,1,2,3,4,5,6,7,8]; is ")
-      new_c_s_2 = c_s.enqueue(55, 5).klog("one item on 10 element array with length set to 5, should be [55,0,1,2,3]; is ")
+      new_c_s = c_s.push(25).klog("one item on 10 element array with default, should be [25,0,1,2,3,4,5,6,7,8]; is ")
+      new_c_s_2 = c_s.push(55, 5).klog("one item on 10 element array with length set to 5, should be [55,0,1,2,3]; is ")
       "testing done, check logs"
     }
 
@@ -111,20 +111,13 @@ ruleset io.picolabs.sensor.community {
     twilio:send_sms(msg, sms_notification_number)
   }
 
-  // Readings
-  //  "probe_temperature"
-  //  "probe_connected"
-  //  "sensor_type"
-	//  "sensor_id"
-  //  "timestamp"
-  //  "sensor_name"
 	  rule catch_new_readings {
     select when sensor new_readings
     pre {
       name = event:attr("sensor_name");
     }
     always {
-      ent:sensor_readings{name} := ent:sensor_readings{name}.defaultsTo([]).enqueue(event:attrs)
+      ent:sensor_readings{name} := ent:sensor_readings{name}.defaultsTo([]).push(event:attrs)
     }
   }
 
