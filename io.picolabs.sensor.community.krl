@@ -104,6 +104,23 @@ ruleset io.picolabs.sensor.community {
     twilio:send_sms(msg, sms_notification_number)
   }
 
+  // Readings
+  //  "probe_temperature"
+  //  "probe_connected"
+  //  "sensor_type"
+	//  "sensor_id"
+  //  "timestamp"
+  //  "sensor_name"
+	  rule catch_new_readings {
+    select when sensor new_readings
+    pre {
+      name = event:attr("sensor_name");
+    }
+    always {
+      ent:sensor_readings{name} := ent:sensor_readings{name}.defaultsTo([]).enqueue(event:attrs)
+    }
+  }
+
   // sensor lifecycle management
   rule new_sensor {
     select when sensor initiation
