@@ -69,8 +69,8 @@ ruleset io.picolabs.sensor.community {
 
     push = function(array, new_element, len=10) {
       cur_len = array.length();
-      new_array = cur_len >= 10 => array.splice(len-1, (cur_len - len) + 1)
-                                 | array;
+      new_array = cur_len >= len => array.splice(len-1, (cur_len - len) + 1)
+                                  | array;
       new_element.append(new_array.klog("new array"))
     }
 
@@ -82,6 +82,8 @@ ruleset io.picolabs.sensor.community {
       c_s = [0,1,2,3,4,5,6,7,8,9];
       new_c_s = c_s.push(25).klog("one item on 10 element array with default, should be [25,0,1,2,3,4,5,6,7,8]; is ")
       new_c_s_2 = c_s.push(55, 5).klog("one item on 10 element array with length set to 5, should be [55,0,1,2,3]; is ")
+      d_s = c_s.append(b_s)
+      new_d_s = c_s.push(46, 15).klog("one item on a 16 element array with len = 15, should be [46.0,1,2,3,4,5,6,7,8,9,0,1,2,3]; is")
       "testing done, check logs"
     }
 
