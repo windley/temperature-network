@@ -83,7 +83,7 @@ ruleset io.picolabs.sensor.community {
       new_c_s = c_s.push(25).klog("one item on 10 element array with default, should be [25,0,1,2,3,4,5,6,7,8]; is ")
       new_c_s_2 = c_s.push(55, 5).klog("one item on 10 element array with length set to 5, should be [55,0,1,2,3]; is ")
       d_s = c_s.append(b_s)
-      new_d_s = c_s.push(46, 15).klog("one item on a 16 element array with len = 15, should be [46.0,1,2,3,4,5,6,7,8,9,0,1,2,3]; is")
+      new_d_s = d_s.push(46, 15).klog("one item on a 16 element array with len = 15, should be [46.0,1,2,3,4,5,6,7,8,9,0,1,2,3]; is")
       "testing done, check logs"
     }
 
