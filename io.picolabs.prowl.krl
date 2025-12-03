@@ -11,9 +11,19 @@ ruleset io.picolabs.prowl {
                     providerkey = ""
                     application = "Pico Labs"
     provides notify
+
+    shares show_configuration
   }
 
   global {
+
+    show_configuration = function() {
+      return {"apikey": ent:apikey,
+              "providerkey": ent:providerkey,
+              "application": ent:application
+             }
+    }
+
    notify = defaction(title, description, url="", priority = 0) {
   
      http:post("https://api.prowlapp.com/publicapi/add", 
@@ -30,4 +40,38 @@ ruleset io.picolabs.prowl {
       return resp
     } 
   }
+
+  // to use create a channel that allows the prowl domain; delete channel when done testing and configuring for security
+
+
+  rule save_config {
+    select when prowl configuration
+    pre {
+      apikey = event:attr("apikey")
+      providerkey = event:attr("providerkey")
+      application = event:attr("application").defaultsTo("Pico Labs")
+    }
+    if not (apikey.isnull() 
+          || providerkey.isnull() 
+          || application.isnull()
+           ) then noop()
+    fired {
+      log info "Configuring Prowl ";
+      ent:providerkey := providerkey;
+      ent:apikey := apikey;
+      ent:application := application;
+    }
+  }
+
+  rule test_config {
+    select when prowl test
+    pre {
+      msg = event:attr("msg")
+    }
+    notify("Test notification", <<Test message:  #{msg}>>) setting(resp)
+    always {
+      log info <<Test message sent: #{msg}; #{resp.klog("Response")} >>
+    }
+  }
+
 }
