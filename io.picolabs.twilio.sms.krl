@@ -72,7 +72,7 @@ ruleset io.picolabs.twilio.sms {
     pre {
       msg = event:attr("msg")
     }
-    send_sms(<<Test message:  msg>>, "+18013625611") setting(resp)
+    send_sms(<<Test message:  #{msg}>>, "+18013625611") setting(resp)
     always {
       log info <<Test message sent: #{msg}; #{resp.klog("Response")} >>
     }
