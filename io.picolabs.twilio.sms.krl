@@ -27,16 +27,21 @@ ruleset io.picolabs.twilio.sms {
     // account_sid = account_sid || show_configuration(){["account_sid"]} 
     // auth_token = auth_token || show_configuration(["auth_token"] )
     
-    base_url = <<https://#{account_sid}:#{auth_token}@api.twilio.com/2010-04-01/Accounts/#{account_sid}/>>
+//    base_url = <<https://#{account_sid}:#{auth_token}@api.twilio.com/2010-04-01/Accounts/#{account_sid}/>>
+    base_url = <<https://api.twilio.com/2010-04-01/Accounts/#{account_sid}/>>
     
     
     //outgoing actions
     send_sms = defaction(message, to, from=from_number){ 
-        http:post(base_url + "Messages.json", 
+        http:post((base_url + "Messages.json").klog("URL"), 
             form = {
                 "From":from,
                 "To":to,
                 "Body":message
+            },
+            auth = {
+                "username": ent:account_sid,
+                "password": ent:auth_token
             }) setting (resp);
         return resp
     };
@@ -69,7 +74,7 @@ ruleset io.picolabs.twilio.sms {
     }
     send_sms(<<Test message:  msg>>, "+18013625611") setting(resp)
     always {
-      log info "Test message sent: ".klog(resp)
+      log info <<Test message sent: #{msg}; #{resp.klog("Response")} >>
     }
   }
   
