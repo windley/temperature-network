@@ -24,13 +24,13 @@ ruleset io.picolabs.prowl {
              }
     }
 
-   notify = defaction(title, description, url="", priority = 0) {
+   notify = defaction(title, description, priority = 0, url="") {
   
      http:post("https://api.prowlapp.com/publicapi/add", 
       form = {
-       "apikey":apikey,
-       "providerkey":providerkey,
-       "application":application,
+       "apikey": ent:apikey,
+       "providerkey": ent:providerkey,
+       "application": ent:application,
        "priority": priority < -2 || priority > 2 => 0 | priority,
        "event": title.klog("Title: "),
        "description" : description,
