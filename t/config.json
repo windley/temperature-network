@@ -1,0 +1,20 @@
+{
+  "repoName": "sensor-network",
+  "dockerImage": "picolabs/pico-engine:latest",
+  "manifoldApiPath": "../manifold-api",
+  "mounts": [
+    {
+      "name": "sensor-network",
+      "hostPath": ".",
+      "containerPath": "/var/sensor-network",
+      "parseExclude": ["OLD/**", "dotfile_for_temp_network/**"]
+    }
+  ],
+  "dependsOn": [
+    {
+      "repo": "manifold-api",
+      "mount": "/var/manifold-api",
+      "parseExclude": ["OLD/**", "fix/**", "io.picolabs.alexa.krl", "io.picolabs.google_assistant.krl"]
+    }
+  ]
+}

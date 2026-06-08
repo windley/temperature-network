@@ -37,9 +37,11 @@ ruleset io.picolabs.iotplotter {
       return resp
     }
 
+    // Sole source of truth for the effective IoTPlotter configuration:
+    // ruleset config takes precedence, falling back to entity variables.
     show_configuration = function() {
-      return {"api_key": ent:api_key,
-              "feed_id": ent:feed_id.klog("Feed ID retrieved: ")}
+      return {"api_key": meta:rulesetConfig{["api_key"]} || ent:api_key,
+              "feed_id": meta:rulesetConfig{["feed_id"]} || ent:feed_id}
     }
 
     README = function() {
@@ -52,12 +54,16 @@ IoTPlotter feed_id's are just digits. The pico enginer UI will parse them as INT
 
   rule send_data_to_IoTPlotter {
     select when sensor new_readings
+    pre {
+      config = show_configuration();
+      feed_id = config{"feed_id"};
+      api_key = config{"api_key"};
+    }
+    // only send to IoTPlotter when configured; skip if either value is missing
+    if not (feed_id.isnull() || api_key.isnull()) then
+      send_payload(feed_id, api_key, event:attrs) setting(resp)
 
-    send_payload((meta:rulesetConfig{["feed_id"]} || ent:feed_id),
-                 (meta:rulesetConfig{["api_key"]} || ent:api_key),
-                 event:attrs) setting(resp)
-   
-    always {
+    fired {
       response =  resp.klog("POST response");
     }
   }

@@ -1,1 +1,31 @@
-config.json
+# Local secrets / engine config at repo root (not for git)
+/config.json
+
+# Node / npm
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm
+.pnpm-store/
+*.log
+
+# TypeScript / build output
+dist/
+*.tsbuildinfo
+
+# Test harness runtime state
+t/.runtime.json
+
+# Symlink to local manifold-api checkout (see t/config.json → manifoldApiPath)
+.manifold-api
+
+# Archived rulesets (local reference only)
+OLD/
+
+# Local pico-engine data dir
+dotfile_for_temp_network/
+
+# OS
+.DS_Store

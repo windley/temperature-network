@@ -7,12 +7,8 @@ ruleset io.picolabs.sensor.community {
     version "draft"
 
     use module io.picolabs.wrangler alias wrangler
-    use module io.picolabs.prowl alias prowl with apikey = meta:rulesetConfig{["prowl_apikey"]} 
-                                                  providerkey = meta:rulesetConfig{["prowl_providerkey"]}
-    use module io.picolabs.twilio.sms alias twilio with from_number = meta:rulesetConfig{["twilio_from_number"]}
-                                                        account_sid = meta:rulesetConfig{["twilio_account_sid"]} 
-                                                        auth_token = meta:rulesetConfig{["twilio_auth_token"]}
-   
+    use module io.picolabs.subscription alias subscription
+     
     shares
       test_push,
       children, 
@@ -24,13 +20,28 @@ ruleset io.picolabs.sensor.community {
 
   global {
 
-    sms_notification_number = "8013625611"
-
     channels = [
       {"tags": ["sensor"],
        "eventPolicy": {
-         "allow": [ { "domain": "sensor", "name": "*" }, ],
+         "allow": [
+           { "domain": "sensor", "name": "*" },
+           { "domain": "community", "name": "add_thing" }
+         ],
         "deny": []
+        },
+       "queryPolicy": {
+         "allow": [ { "rid": "*", "name": "*" } ],
+         "deny": []
+       }
+     },
+      // Dedicated channel for Manifold's thing-creation delegation callback.
+      // The subscription well-known channel cannot be used as callback_eci
+      // because its event policy only allows engine_ui/wrangler events, not
+      // the "community thing_created" callback Manifold sends.
+      {"tags": ["manifold_callback"],
+       "eventPolicy": {
+         "allow": [ { "domain": "community", "name": "thing_created" } ],
+         "deny": []
         },
        "queryPolicy": {
          "allow": [ { "rid": "*", "name": "*" } ],
@@ -54,16 +65,24 @@ ruleset io.picolabs.sensor.community {
                      };
 
 
+    // Sensors are now Manifold "things" subscribed to this community rather than
+    // child picos, so enumerate them via the community/thing subscriptions.
+    sensorThings = function() {
+      subscription:established().filter(function(sub){
+        sub{"Tx_role"} == "thing"
+      });
+    };
+
     lastTemperatures = function() {
-      children = wrangler:children();
-      children.map(function(child){
-                     temperature = wrangler:picoQuery(child.get("eci"),
-                                                      "io.picolabs.lht65.router",
-                                                      "lastInternalTemp").head()
-                     reading = {"name": child.get("name"),
-                                "lastTemperature": temperature
-                               }
-                     reading
+      sensorThings().map(function(sub){
+                     temperature = wrangler:picoQuery(sub{"Tx"},
+                                                     "io.picolabs.lht65.router",
+                                                     "lastInternalTemp");
+                     name = sub{"name"} ||
+                            wrangler:picoQuery(sub{"Tx"}, "io.picolabs.wrangler", "myself"){"name"};
+                     {"name": name,
+                      "lastTemperature": temperature
+                     }
                    });
     };
 
@@ -104,15 +123,37 @@ ruleset io.picolabs.sensor.community {
   //   "threshold": 60,
   //   "message": " threshold violation:  device_temperature is over threshold of 60 for dragino_lht65 "
   // }
+  // Route threshold violations to the Manifold pico's notification platform
+  // ("manifold add_notification") instead of calling Prowl/Twilio directly.
+  // Manifold fans the notification out to Twilio/Prowl/Email/Text per the
+  // thing's notification_settings. The manifold pico is the Tx of our
+  // "manifold_pico"-role subscription.
   rule catch_threshold_violation {
     select when sensor threshold_violation
     pre {
-      msg = <<Threshold violation on #{event:attr("pico_name")}: #{event:attr("message")}>>
+      manifold_eci = subscription:established().filter(function(s){
+        s{"Tx_role"} == "manifold_pico"
+      }).head(){"Tx"};
+      // The community is the notification SUBJECT for network-function alerts, so
+      // we report our OWN picoId. The originating sensor's name/id ride along for
+      // display only.
+      sensor_id = event:attr("sender_id") || event:attr("sensor_id");
+      thing = event:attr("pico_name") || event:attr("name");
+      msg = <<Threshold violation on #{event:attr("pico_name")}: #{event:attr("message")}>>;
+      attrs = {
+        "picoId"   : meta:picoId,
+        "thing"    : thing,
+        "sensor_id": sensor_id,
+        "app"      : wrangler:name().defaultsTo("Sensor Network"),
+        "message"  : msg,
+        "ruleset"  : meta:rid
+      };
     }
-    every {
-      prowl:notify("Threshold Violatoin", msg, priority=1) setting(resp);
-      twilio:send_sms(msg, sms_notification_number)
-    }
+    if manifold_eci && thing then
+      event:send({ "eci": manifold_eci,
+                   "domain": "manifold",
+                   "type": "add_notification",
+                   "attrs": attrs });
   }
 
 	  rule catch_new_readings {
@@ -126,38 +167,122 @@ ruleset io.picolabs.sensor.community {
   }
 
   // sensor lifecycle management
+  //
+  // Delegation step (initiate): rather than creating the sensor pico as our own
+  // child, we ask the Manifold pico (our parent) to create a bare "thing" and
+  // call us back. We mint a correlation id (rcn), stash the sensor-specific
+  // context under it, and pass only {name, callback_eci, rcn} to Manifold.
   rule new_sensor {
     select when sensor initiation
     pre {
       sensor_color = (event:attr("color")|| "#ae85fa").klog("Color: ")
       sensor_name = (event:attr("name") || "sensor_"+random:word()).klog("Name: ")
       sensor_type = (event:attr("type") || "dht65").klog("Type: ")
-      to_install = rids_to_install{"all"}.append(rids_to_install{sensor_type}.defaultsTo([]));
+      url_rids = rids_to_install{"all"}.append(rids_to_install{sensor_type}.defaultsTo([]));
+      config = event:attr("config").defaultsTo({});
+      rcn = "REQ-" + random:uuid();
+      callback_eci = wrangler:channels("manifold_callback").head(){"id"};
+      manifold_eci = wrangler:parent_eci();
     }
-    send_directive("new sensor pico initiated", {"sensor_name":sensor_name})
-    always {
+    if sensor_name && callback_eci && manifold_eci then
+      every {
+        send_directive("delegating sensor creation to Manifold",
+                       {"sensor_name": sensor_name, "rcn": rcn});
+        event:send({
+          "eci": manifold_eci,
+          "eid": "create_thing",
+          "domain": "manifold",
+          "type": "create_thing",
+          "attrs": {
+            "name": sensor_name,
+            "callback_eci": callback_eci,
+            "rcn": rcn
+          }
+        });
+      }
+    fired {
       ent:sensors := ent:sensors.defaultsTo([]).union([sensor_name]);
-      raise wrangler event "new_child_request"
-        attributes { "name": sensor_name, "backgroundColor": sensor_color,
-                     "sensor_type": sensor_type,
-                     "url_rids": to_install
-                   }
+      ent:pending{rcn} := {
+        "name": sensor_name,
+        "sensor_type": sensor_type,
+        "color": sensor_color,
+        "url_rids": url_rids,
+        "config": config
+      };
     }
   }
 
-rule sensor_initialization {
-    select when wrangler new_child_created 
+  // Delegation step (finish): Manifold has created and subscribed the bare
+  // thing and is calling us back with the correlation id. Reload our context,
+  // join the thing to this community, and give it its sensor capabilities.
+  rule finish_sensor {
+    select when community thing_created
+    pre {
+      rcn = event:attr("rcn");
+      info = ent:pending.defaultsTo({}){rcn};
+      thing_eci = event:attr("thing_eci");
+      thingPicoID = event:attr("thingPicoID");
+      url_rids = info{"url_rids"}.defaultsTo([]);
+      config = info{"config"}.defaultsTo({});
+    }
+    if info && thing_eci then
+      send_directive("finishing sensor setup",
+                     {"name": info{"name"}, "thing_eci": thing_eci})
+    fired {
+      // establish the community <-> thing subscription (io.picolabs.community)
+      raise community event "add_thing"
+        attributes { "eci": thing_eci };
+      // install the specialized sensor rulesets on the thing
+      raise sensor event "install_rulesets"
+        attributes { "thing_eci": thing_eci,
+                     "url_rids": url_rids,
+                     "config": config };
+      ent:sensor_things{thingPicoID} := info;
+      ent:sensor_things{[thingPicoID, "thing_eci"]} := thing_eci;
+      clear ent:pending{rcn};
+    }
+  }
+
+  // Push the sensor-type rulesets to the newly created thing. These rulesets
+  // live in this same (sensor network) repo, so meta:rulesetURI resolves them.
+  rule install_sensor_rulesets {
+    select when sensor install_rulesets
     foreach event:attr("url_rids") setting(rid)
-      event:send(
-        { "eci": event:attr("eci"), "eid": random:word(),
-          "domain": "wrangler", "type": "install_ruleset_request",
+      pre {
+        thing_eci = event:attr("thing_eci");
+        config = event:attr("config");
+        absoluteURL = meta:rulesetURI;
+      }
+      if thing_eci && absoluteURL then
+        event:send({
+          "eci": thing_eci,
+          "eid": "install",
+          "domain": "wrangler",
+          "type": "install_ruleset_request",
           "attrs": {
-            "absoluteURL":meta:rulesetURI,
-            "rid":rid,
-            "config":event:attr("config")
+            "rid": rid,
+            "absoluteURL": absoluteURL,
+            "config": config
           }
-        }
-     )
+        });
+  }
+
+  // Ingest sensor events arriving from member things (sensors report via
+  // io.picolabs.thing's community_notify -> community thing_event_occurred)
+  // and re-raise them into the sensor domain for the handlers below.
+  rule ingest_thing_event {
+    select when community thing_event_occurred where event:attr("domain") == "sensor"
+    pre {
+      evt_type = event:attr("type");
+      // carry the originating thing's pico id (sender_id) so downstream
+      // handlers (e.g. notifications) can identify the source thing
+      evt_attrs = event:attr("attrs").defaultsTo({}).put("sender_id", event:attr("sender_id"));
+    }
+    if evt_type then
+      send_directive("ingesting thing event", {"type": evt_type})
+    fired {
+      raise sensor event evt_type attributes evt_attrs
+    }
   }
 
   rule initialize_temperatures {

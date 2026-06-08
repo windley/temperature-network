@@ -107,13 +107,17 @@ ruleset io.picolabs.sensor.thresholds {
     }
   }
 
-  rule send_violation_to_parent {
+  // Report threshold violations to the sensor community over the Manifold
+  // community/thing subscription (via io.picolabs.thing's notifyCommunity)
+  // rather than directly to the parent pico.
+  rule send_violation_to_community {
     select when sensor threshold_violation
-    event:send({"eci": wrangler:parent_eci().klog("Parent ECI"),
-                "domain": "sensor",
-                "type": "threshold_violation",
-                "attrs": event:attrs
-               })
+    fired {
+      raise thing event "community_notify"
+        attributes { "domain": "sensor",
+                     "type": "threshold_violation",
+                     "attrs": event:attrs };
+    }
    }
   
   rule inialize_ruleset {

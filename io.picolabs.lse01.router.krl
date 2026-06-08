@@ -9,7 +9,7 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
     use module io.picolabs.wrangler alias wrangler
     use module io.picolabs.dragino alias dragino
 
-    share lastHeartbeat, lastMoisture, lastTemperature, lastConductivity
+    shares lastHeartbeat, lastMoisture, lastTemperature, lastConductivity
 
   }
 
@@ -113,6 +113,22 @@ Received and decodes heartbeat information from a Dragino LSE01 (soil sensor)
         raise sensor event "new_readings" attributes readings;
 
       }
+  }
+
+  // Route readings to the sensor community over the Manifold community/thing
+  // subscription. io.picolabs.thing's notifyCommunity turns this into a
+  // "community thing_event_occurred" on every community this thing belongs to.
+  rule route_to_community {
+    select when sensor new_readings
+    pre {
+      readings = event:attrs.klog("Readings");
+    }
+    fired {
+      raise thing event "community_notify"
+        attributes { "domain": "sensor",
+                     "type": "new_readings",
+                     "attrs": readings };
+    }
   }
 
   rule create_channels {

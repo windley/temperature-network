@@ -166,14 +166,20 @@ Received and decodes heartbeat information from a Dragino LHT65
       }
   }
 
-    // meant to generally route events to sensor community. Extend eventex to choose what gets routed
+    // Route readings to the sensor community over the Manifold community/thing
+    // subscription. io.picolabs.thing's notifyCommunity turns this into a
+    // "community thing_event_occurred" on every community this thing belongs to.
     rule route_to_community {
       select when sensor new_readings
       pre {
-        community = wrangler:parent_eci().klog("Parent");
         readings = event:attrs.klog("Readings");
       }
-      event:send({"eci": community, "domain":"sensor", "type": "new_readings", "attrs": readings});
+      fired {
+        raise thing event "community_notify"
+          attributes { "domain": "sensor",
+                       "type": "new_readings",
+                       "attrs": readings };
+      }
     }
 
 
