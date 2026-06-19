@@ -3,31 +3,44 @@
 Working context for this repo across sessions. For Manifold migration history and
 manifold-api harness details, see [`../manifold-api/MEMORY.md`](../manifold-api/MEMORY.md).
 
-## WHERE WE ARE (2026-06-08)
+## WHERE WE ARE (2026-06-09)
 
 ### Summary
 
-Integration tests for the sensor network live in **`sensor-network/t/`**. The harness
-reuses manifold-api's Docker/bootstrap stack via sibling-repo imports and `dependsOn` — it
-does **not** duplicate the full test infrastructure.
+Integration tests live in **`sensor-network/t/`**. The harness reuses manifold-api's
+Docker/bootstrap stack via `dependsOn`, `manifoldApiPath`, and a `.manifold-api` symlink for
+TypeScript imports — it does **not** duplicate the full test infrastructure.
 
-**Automated regression (today):** 3 tests pass in ~15s when Docker is running:
-health check, sensor community creation, and lht65 sensor thing initiation.
+**Automated regression (today):** **5 tests** pass in ~10s when Docker is running:
+health, sensor community creation (incl. PDS profile name), and sensor initiation for **lht65**,
+**lse01**, and **lsn50** (incl. PDS on thing picos).
 
-**Not yet automated:** readings/threshold path, notification delivery.
+**Not yet automated:** readings/threshold path, notification delivery verification.
 
-### Verified working (automated, 2026-06-08)
+**GitHub:** `windley/sensor-network` (renamed from `temperature-network`, 2026-06-09).
+Pushed; local remote `origin` → `https://github.com/windley/sensor-network.git`.
+
+**Recommended runtime:** Node **22 LTS** (requires 18+).
+
+### Verified working (automated, 2026-06-09)
 
 | Scenario | What it proves |
 |----------|----------------|
 | `health` | Pico engine reachable over HTTP |
-| `sensor community` | `sensor create_community` → Manifold child with `io.picolabs.community` + `io.picolabs.sensor.community`; entry in Manifold `getCommunities` and `getSensorCommunities` |
-| `sensor community` (initiation) | `sensor initiation` `{type: lht65}` → thing with Manifold thing RSs + `sensor.thresholds`, `iotplotter`, `dragino`, `lht65.router`; community↔thing subscription |
+| `sensor community` | `sensor create_community` → Manifold child with PDS + `io.picolabs.community` + `io.picolabs.sensor.community`; PDS profile name; `getSensorCommunities` enriches from PDS |
+| `sensor initiation` (×3) | `sensor initiation` per type → thing with PDS + Manifold thing RSs + sensor RSs + type router; PDS profile name matches thing name; community `things()` via manifold-api PDS-aware community RS |
 
 ### Verified working (manual, pre-harness)
 
-See manifold-api MEMORY.md — bootstrap, initiation, community↔thing subscription, readings,
-threshold path were exercised manually before this harness existed.
+See manifold-api MEMORY.md — readings path and threshold → `manifold add_notification` were
+exercised manually before this harness existed.
+
+### Recent commits (2026-06-09)
+
+| Commit | Summary |
+|--------|---------|
+| `48c3fcd` | Integration harness, `sensor.network_bootstrap`, Manifold delegation refactor, removed duplicate prowl/twilio/wovyn RSs |
+| `c4c6527` | Architecture diagram + expanded root README |
 
 ---
 
@@ -45,30 +58,36 @@ picolabs/   (typical layout — not required)
   manifold-api/
   sensor-network/
     t/config.json   → manifoldApiPath: "../manifold-api"
+    .manifold-api   → symlink (gitignored, created by t/run.ts)
 ```
 
-### What we built (2026-06-08)
+### What we built
 
 | Piece | Purpose |
 |-------|---------|
 | `t/config.json` | Own mount at `/var/sensor-network`; `manifoldApiPath` + `dependsOn` for manifold-api |
-| `t/run.ts` | Parse → Docker → Manifold bootstrap → sensor bootstrap → scenarios → teardown |
-| `t/lib/sensor.ts` | `setupSensorNetworkBootstrap()`, `createSensorCommunity()`, `getSensorCommunities()` |
-| `t/lib/run-tests.ts` | Local copy of node:test runner (required — see **Gotchas** below) |
-| `t/lib/test-context.ts` | Re-exports `getTestState` / `getTestBootstrap` from manifold-api |
-| `t/scenarios/*.scenario.ts` | Test scenarios (not `*.test.ts` — see **Gotchas**) |
-| `t/scenarios/index.ts` | Barrel import; **sensor scenarios listed before health** |
+| `t/run.ts` | Symlink prep → parse → Docker → Manifold bootstrap → sensor bootstrap → scenarios → teardown |
+| `t/run-main.ts` | Orchestrator; writes `t/.test-context.json` for scenario subprocess |
+| `t/lib/prepare-manifold-api.ts` | Resolves `manifoldApiPath`; creates `.manifold-api` symlink |
+| `t/lib/sensor.ts` | `setupSensorNetworkBootstrap()`, `createSensorCommunity()`, `createSensorThing()` |
+| `t/lib/run-tests.ts` | Spawns child `node --test` on `t/scenarios/index.ts` only |
+| `t/lib/sensor-fixture.ts` | In-process fixture: community scenario → initiation scenarios |
+| `t/lib/test-context.ts` | Re-exports manifold-api test fixtures |
+| `t/scenarios/index.ts` | Single entry: community → initiation → health (order matters) |
+| `t/disable-auto-test.mjs` | Prevents tsx from auto-running tests before bootstrap |
 | `package.json` | `npm test`, `test:parse`, `test:keep`, `test:cleanup` |
 
 ### Test run flow
 
 ```
 npm test
+  → ensureManifoldApiLink()       ← .manifold-api symlink
   → parse (sensor-network + manifold-api KRL via dependsOn)
   → one Docker container, both mounts
-  → setupManifoldBootstrap()          ← imported from ../manifold-api/t/lib
-  → setupSensorNetworkBootstrap()     ← installs io.picolabs.sensor.network_bootstrap on Manifold pico
-  → scenarios (node:test)
+  → setupManifoldBootstrap()      ← from .manifold-api/t/lib
+  → setupSensorNetworkBootstrap() ← installs io.picolabs.sensor.network_bootstrap
+  → write t/.test-context.json
+  → child: node --test t/scenarios/index.ts
   → teardown (leave container on failure)
 ```
 
@@ -78,34 +97,33 @@ Manifold-api's bootstrap and thing/community scenarios are **not** re-run here.
 
 ```bash
 cd sensor-network && npm install
-npm test                    # full run (~15s, 2 tests)
+npm test                    # full run (~10s, 5 tests)
 npm run test:parse          # krl-compiler on both repos' mounted KRL
 npm run test:keep           # leave container up after run
 npm run test:cleanup        # remove leftover containers + /tmp pico homes
 npm test -- --skip-parse    # Docker + scenarios only
 ```
 
-Runtime state: `t/.runtime.json` (gitignored).
+Runtime state: `t/.runtime.json` (gitignored). Test context file lives in manifold-api's
+`t/.test-context.json` (resolved via symlinked module path).
 
 ---
 
-## Reuse pattern (dependsOn + imports)
+## Reuse pattern (dependsOn + symlink)
 
 **`dependsOn` in config** mounts manifold-api into the same container and includes its KRL in
-the parse gate. It does **not** automatically share TypeScript code.
+the parse gate.
 
-**TypeScript reuse:** import helpers from the sibling repo:
+**TypeScript reuse:** import from `.manifold-api/t/lib/...` (symlink to local checkout).
+Import depth matters — paths are relative to each file's location under `t/`:
 
-```typescript
-import { setupManifoldBootstrap } from "../../.manifold-api/t/lib/bootstrap.js";
-import { query, signalWait } from "../../.manifold-api/t/lib/engine.js";
-import { getManifoldAppEci } from "../../.manifold-api/t/lib/manifold.js";
-```
+| From | Import prefix |
+|------|---------------|
+| `t/run-main.ts`, `t/setup.ts`, `t/teardown.ts` | `../.manifold-api/t/lib/...` |
+| `t/lib/*.ts`, `t/scenarios/*.ts` | `../../.manifold-api/t/lib/...` |
 
-**manifold-api harness change for cross-repo support (2026-06-08):** config paths
-(`resolveMountHostPath`, `dependsOn` paths, `runtimePath`) are now relative to whichever
-repo's `t/config.json` is loaded, not hardcoded to manifold-api's root. `RuntimeState`
-includes `configPath`.
+**manifold-api harness change for cross-repo support:** `manifoldApiPath` on `TestConfig`,
+`--manifold-api-path` CLI flag, `MANIFOLD_API_PATH` env, `resolveDependencyHostPath()`.
 
 ---
 
@@ -123,23 +141,27 @@ through app ECI.
 ### 2. Subprocess test runner (`run-tests.ts`)
 
 Scenarios run in a child `node --test` process (same pattern as manifold-api). The parent
-owns Docker/bootstrap; the child reads fixtures from `t/.test-context.json`.
+owns Docker/bootstrap; the child reads fixtures from `.test-context.json`.
 
 Use a **single entry module** (`t/scenarios/index.ts`) so scenarios share in-process state
-(e.g. sensor-community → sensor-initiation fixture). Passing multiple files to `node --test`
-isolates modules and breaks that chain.
+(community → initiation fixture). Passing multiple files to `node --test` isolates modules
+and breaks that chain.
 
-Local copy lives at `sensor-network/t/lib/run-tests.ts` (uses this repo's `node_modules/tsx`).
+**Do not** use in-process programmatic `run()` — Node 22 runs tests twice with conflicting
+reporters (wrong pass count); Node 18 hangs before teardown and leaks containers.
 
-### 3. Scenario files named `*.scenario.ts`
+### 3. `.manifold-api` import paths
 
-Files named `*.test.ts` can be auto-executed by tsx/node before the programmatic runner
-starts, which breaks registration order when some scenarios import after async bootstrap.
-Use `*.scenario.ts` and load via `t/scenarios/index.ts`.
+One extra `../` resolves to `picolabs/.manifold-api` instead of `sensor-network/.manifold-api`.
+Symptom: `ERR_MODULE_NOT_FOUND` for `t/lib/cli.js`.
 
-### 4. Import order in `scenarios/index.ts`
+### 4. Scenario files named `*.scenario.ts`
 
-Community before initiation (initiation reads the in-process fixture set by community):
+Not `*.test.ts` — avoids tsx auto-discovery before bootstrap completes.
+
+### 5. Import order in `scenarios/index.ts`
+
+Community before initiation (initiation reads fixture set by community):
 
 ```typescript
 import "./sensor-community.scenario.js";
@@ -147,37 +169,34 @@ import "./sensor-initiation.scenario.js";
 import "./health.scenario.js";
 ```
 
-### 5. `getSensorCommunities` return shape
+### 6. `getSensorCommunities` return shape
 
 The KRL function returns a map's `.values()`. The HTTP query may come back as an object, not
 an array. `getSensorCommunities()` normalizes with `Object.values()`.
 
-### 6. Parse exclusions
+### 7. Parse exclusions / removed rulesets
 
-Legacy/broken rulesets excluded from parse gate in `t/config.json`:
+Removed from repo (now in manifold-api): `io.picolabs.prowl.krl`, `io.picolabs.twilio.sms.krl`.
+Removed legacy: `io.picolabs.wovyn.*`.
 
-- `dotfile_for_temp_network/**`
-- `OLD/**` (legacy wovyn stack, duplicate notification RSs, scratch files)
-
-manifold-api exclusions are on the `dependsOn` entry (`OLD/**`, alexa/google assistant, etc.).
+Parse exclusions in `t/config.json`: `OLD/**`, `dotfile_for_temp_network/**`; manifold-api
+`dependsOn` excludes `OLD/**`, `fix/**`, alexa/google assistant.
 
 ---
 
-## KRL files central to tests
+## KRL architecture (this repo on Manifold)
 
-| Ruleset | Role in tests |
-|---------|---------------|
-| `io.picolabs.sensor.network_bootstrap.krl` | Installed on Manifold pico; handles `sensor create_community` |
-| `io.picolabs.sensor.community.krl` | Installed on community child by bootstrap's `finish_sensor_community` |
-| `io.picolabs.community.krl` | Installed by manifold_pico (via manifold-api mount) |
-| Manifold bootstrap RSs | Via `setupManifoldBootstrap()` — not owned by this repo |
+| Ruleset | Installed on | Role |
+|---------|--------------|------|
+| `io.picolabs.sensor.network_bootstrap` | Manifold pico | `sensor create_community` → delegate to `manifold new_community`; install `sensor.community`; provision notifications |
+| `io.picolabs.sensor.community` | Community pico | `sensor initiation` → delegate `manifold create_thing`; finish via callback; install routers |
+| `io.picolabs.*.router` | Thing picos | Decode LoRaWAN payloads; `thing community_notify` for readings |
+| `io.picolabs.sensor.thresholds` | Thing picos | Threshold violations → community via `community_notify` |
 
-Ruleset URLs in container:
+Notifications: community `catch_threshold_violation` → `manifold add_notification` (subject =
+community picoId). Do not call Twilio/Prowl directly.
 
-```
-file:///var/sensor-network/io.picolabs.sensor.network_bootstrap.krl
-file:///var/manifold-api/io.picolabs.manifold_pico.krl
-```
+Root README documents Manifold services used and bootstrap flow (`sensor_network.png` diagram).
 
 ---
 
@@ -185,16 +204,17 @@ file:///var/manifold-api/io.picolabs.manifold_pico.krl
 
 | Item | Notes |
 |------|-------|
-| **Readings / threshold scenario** | End-to-end after initiation |
-| **Notification scenario** | `addNotification` + channel provisioning via bootstrap `community_ready` |
+| **Readings scenario** | Heartbeat → `ingest_thing_event` → `catch_new_readings` |
+| **Threshold / notification scenario** | Violation → `add_notification`; verify inbox when Manifold channel enabled |
 | **Remove community scenario** | Cleanup / subscription teardown |
-| **Shared test package** | Optional future: extract common `t/lib` to `@picolabs/pico-test-harness` if more repos need this |
+| **ldds20 / wl03a_lb initiation** | Routers exist; add to `SENSOR_INITIATION_CASES` when ready |
 | **CI** | Local only for now |
 
 ---
 
 ## Related docs
 
+- [`README.md`](README.md) — Manifold integration, bootstrap flow, rulesets
 - [`t/README.md`](t/README.md) — how to run tests, config, writing scenarios
 - [`../manifold-api/t/README.md`](../manifold-api/t/README.md) — shared flags, cleanup, parse gate
-- [`../manifold-api/MEMORY.md`](../manifold-api/MEMORY.md) — migration history, KRL conventions, manifold-api harness phases
+- [`../manifold-api/MEMORY.md`](../manifold-api/MEMORY.md) — migration history, KRL conventions, manifold-api harness

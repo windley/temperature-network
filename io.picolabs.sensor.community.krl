@@ -8,6 +8,7 @@ ruleset io.picolabs.sensor.community {
 
     use module io.picolabs.wrangler alias wrangler
     use module io.picolabs.subscription alias subscription
+    use module io.picolabs.pds alias pds
      
     shares
       test_push,
@@ -73,14 +74,22 @@ ruleset io.picolabs.sensor.community {
       });
     };
 
+    pdsProfileField = function(eci, field) {
+      wrangler:picoQuery(eci, "io.picolabs.pds", "profile", field){"profile"}
+    };
+
+    thingDisplayName = function(sub) {
+      sub{"name"}
+        || pdsProfileField(sub{"Tx"}, "name")
+        || wrangler:picoQuery(sub{"Tx"}, "io.picolabs.wrangler", "myself"){"name"}
+    };
+
     lastTemperatures = function() {
       sensorThings().map(function(sub){
                      temperature = wrangler:picoQuery(sub{"Tx"},
                                                      "io.picolabs.lht65.router",
                                                      "lastInternalTemp");
-                     name = sub{"name"} ||
-                            wrangler:picoQuery(sub{"Tx"}, "io.picolabs.wrangler", "myself"){"name"};
-                     {"name": name,
+                     {"name": thingDisplayName(sub),
                       "lastTemperature": temperature
                      }
                    });
@@ -138,13 +147,16 @@ ruleset io.picolabs.sensor.community {
       // we report our OWN picoId. The originating sensor's name/id ride along for
       // display only.
       sensor_id = event:attr("sender_id") || event:attr("sensor_id");
-      thing = event:attr("pico_name") || event:attr("name");
-      msg = <<Threshold violation on #{event:attr("pico_name")}: #{event:attr("message")}>>;
+      pico_name = event:attr("pico_name") || event:attr("name");
+      thing = pico_name;
+      msg = <<Threshold violation on #{pico_name}: #{event:attr("message")}>>;
+      community_name = pds:profile("name"){"profile"}
+                         || wrangler:name().defaultsTo("Sensor Network");
       attrs = {
         "picoId"   : meta:picoId,
         "thing"    : thing,
         "sensor_id": sensor_id,
-        "app"      : wrangler:name().defaultsTo("Sensor Network"),
+        "app"      : community_name,
         "message"  : msg,
         "ruleset"  : meta:rid
       };

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { getPdsChannelEci, pdsProfile } from "../../.manifold-api/t/lib/pds.js";
 import { assertIncludes } from "../../.manifold-api/t/lib/assert.js";
 import { waitForInstalledRids } from "../../.manifold-api/t/lib/bootstrap.js";
 import { query } from "../../.manifold-api/t/lib/engine.js";
@@ -56,5 +57,10 @@ describe("sensor community", () => {
     const manifoldEntry = Object.values(communities).find(c => c.name === COMMUNITY_NAME);
     assert.ok(manifoldEntry, `Manifold getCommunities missing "${COMMUNITY_NAME}"`);
     assert.equal(manifoldEntry.picoID, entry.picoID);
+
+    const pdsEci = await getPdsChannelEci(state, uiEci);
+    const profileName = await pdsProfile(state, pdsEci, "name");
+    assert.equal(profileName.status, "success");
+    assert.equal(profileName.profile, COMMUNITY_NAME);
   });
 });

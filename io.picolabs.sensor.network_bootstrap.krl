@@ -25,7 +25,13 @@ Send sensor create_community to the Manifold pico to create a new sensor communi
     default_notify_channels = ["Manifold"]
 
     getSensorCommunities = function() {
-      ent:sensor_communities.defaultsTo({}).values()
+      ent:sensor_communities.defaultsTo({}).map(function(entry, key) {
+        community_eci = entry{"picoID"} || key;
+        pdsProfile = wrangler:picoQuery(community_eci, "io.picolabs.pds", "profile"){"profile"}.defaultsTo({});
+        entry
+          .put(["name"], pdsProfile{"name"} || entry{"name"})
+          .put(["description"], pdsProfile{"description"} || entry{"description"})
+      }).values()
     }
   }
 

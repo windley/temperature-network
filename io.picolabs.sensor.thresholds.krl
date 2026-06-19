@@ -7,6 +7,7 @@ ruleset io.picolabs.sensor.thresholds {
     version "0.1.0"
 
     use module io.picolabs.wrangler alias wrangler
+    use module io.picolabs.pds alias pds
     
     
     shares thresholds
@@ -19,6 +20,10 @@ ruleset io.picolabs.sensor.thresholds {
     thresholds = function(threshold_type) {
       threshold_type => ent:thresholds{threshold_type}
                       | ent:thresholds
+    }
+
+    picoDisplayName = function() {
+      pds:profile("name"){"profile"} || wrangler:myself(){"name"}
     }
   }
 
@@ -89,7 +94,7 @@ ruleset io.picolabs.sensor.thresholds {
                "name": event:attr("name"),
                "sensor_id": event:attr("sensor_id"),
                "timestamp": event:attr("timestamp"),
-               "pico_name": wrangler:myself(){"name"},
+               "pico_name": picoDisplayName(),
                "threshold": under => lower_threshold | upper_threshold,
                "message": <<#{sensor_type} #{msg}>>
               }	      

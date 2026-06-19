@@ -21,6 +21,7 @@ const SENSOR_NETWORK_BOOTSTRAP_RID = "io.picolabs.sensor.network_bootstrap";
 const SENSOR_COMMUNITY_RID = "io.picolabs.sensor.community";
 
 export const SENSOR_COMMUNITY_RULESETS = [
+  "io.picolabs.pds",
   "io.picolabs.community",
   SENSOR_COMMUNITY_RID,
 ] as const;

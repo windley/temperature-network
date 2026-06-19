@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { PDS_RID } from "../../.manifold-api/t/lib/expected-rulesets.js";
+import { getPdsChannelEci, pdsProfile } from "../../.manifold-api/t/lib/pds.js";
 import { assertIncludes } from "../../.manifold-api/t/lib/assert.js";
 import { waitForInstalledRids } from "../../.manifold-api/t/lib/bootstrap.js";
 import { query } from "../../.manifold-api/t/lib/engine.js";
@@ -72,6 +74,15 @@ describe("sensor initiation", () => {
 
       const things = await getThings(state, manifoldAppEci);
       assert.ok(things[entry.picoID], "thing missing from Manifold getThings");
+
+      const pdsEci = await getPdsChannelEci(state, uiEci);
+      const profileName = await pdsProfile(state, pdsEci, "name");
+      assert.equal(profileName.status, "success");
+      assert.equal(profileName.profile, name);
+      assert.ok(
+        rids.includes(PDS_RID),
+        `sensor thing missing ${PDS_RID}; installed: ${rids.join(", ")}`
+      );
     });
   }
 });
