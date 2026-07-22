@@ -1,0 +1,16 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Link to Manifold",
+        "description": "Choose the Manifold hub integration that manages this sensor mesh.",
+        "data": {
+          "pico_mesh_entry_id": "Manifold hub"
+        }
+      }
+    },
+    "abort": {
+      "pico_mesh_required": "Install and configure the Manifold (`pico_mesh`) integration first."
+    }
+  }
+}

@@ -29,3 +29,5 @@ dotfile_for_temp_network/
 
 # OS
 .DS_Store
+__pycache__/
+*.py[cod]

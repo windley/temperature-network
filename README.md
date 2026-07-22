@@ -110,3 +110,39 @@ npm test
 ```
 
 See [`t/README.md`](t/README.md) for the full harness (parse gate, Docker, Manifold bootstrap, sensor scenarios, cleanup).
+
+## Home Assistant companion
+
+This repo includes an optional [Home Assistant](https://www.home-assistant.io/) companion integration under `custom_components/pico_mesh_sensor_network/`. It extends the **[Manifold](https://github.com/picolab/manifold-home-assistant)** hub integration (`pico_mesh`) with sensor entities for router rulesets in this repo (LHT65 today; LSE01, LSN50, etc. later).
+
+### Install
+
+1. Install and configure **Manifold** (`pico_mesh`) from [manifold-home-assistant](https://github.com/picolab/manifold-home-assistant) — OAuth, mesh connection, thing/community devices.
+2. Add **Manifold Sensor Network** from this repo (HACS custom repository or copy `custom_components/pico_mesh_sensor_network/` into your HA `config/custom_components/` directory).
+3. In HA: **Settings → Devices & services → Add integration → Manifold Sensor Network** — link it to your Manifold hub entry.
+
+Sensor entities attach to existing Manifold **thing** devices (same device cards as SafeAndMine). Readings are polled from each thing's router ruleset (e.g. `io.picolabs.lht65.router` → temperature, humidity, last reading).
+
+### Layout
+
+```
+sensor-network/
+  io.picolabs.*.krl              ← engine rulesets
+  custom_components/
+    pico_mesh_sensor_network/    ← HA companion (depends on pico_mesh)
+  hacs.json
+```
+
+Third-party Manifold communities can follow the same pattern: KRL in the repo root, `custom_components/pico_mesh_<name>/` beside it, `"dependencies": ["pico_mesh"]` in `manifest.json`, and a stable import surface from `custom_components.pico_mesh.hub`.
+
+### Docker dev stack
+
+If you use the [manifold-home-assistant Docker stack](https://github.com/picolab/manifold-home-assistant), mount this companion alongside the hub:
+
+```yaml
+volumes:
+  - ../manifold-home-assistant/custom_components/pico_mesh:/config/custom_components/pico_mesh:ro
+  - ../sensor-network/custom_components/pico_mesh_sensor_network:/config/custom_components/pico_mesh_sensor_network:ro
+```
+
+Restart Home Assistant after adding the mount, then add both integrations in HA.

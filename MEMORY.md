@@ -200,7 +200,61 @@ Root README documents Manifold services used and bootstrap flow (`sensor_network
 
 ---
 
-## Still open / next steps
+## Home Assistant companion (2026-07-21)
+
+**Domain:** `pico_mesh_sensor_network` (display name **Manifold Sensor Network**)  
+**Location:** `custom_components/pico_mesh_sensor_network/` in this repo  
+**Depends on:** [`manifold-home-assistant`](../manifold-home-assistant) hub (`pico_mesh`)
+
+Reference implementation of the **Manifold companion pattern** — co-publish KRL + HA integration
+from one repo; see [`../manifold-home-assistant/MEMORY.md`](../manifold-home-assistant/MEMORY.md).
+
+### Layout
+
+```
+sensor-network/
+  io.picolabs.*.krl
+  custom_components/pico_mesh_sensor_network/
+  hacs.json
+```
+
+### Behavior
+
+- Config flow links to one Manifold hub config entry (`unique_id = hub_entry_id` → **one companion
+  entry per hub**; multiple hubs on one HA each get their own entry).
+- `SensorNetworkCoordinator` refreshes when the hub coordinator polls.
+- Probes `wrangler:installedRIDs` on each thing Tx; for LHT65 installs router queries.
+- Sensor entities attach to existing Manifold **thing** devices (same device registry identifiers).
+
+### LHT65 entities (verified working)
+
+| Entity | Query | Unit |
+|--------|-------|------|
+| Temperature | `lastInternalTemp` | °F |
+| Humidity | `lastHumidity` | % |
+| Probe temperature | `lastProbeTemp` | °F (unavailable if no probe) |
+| Last reading | `lastHeartbeat` → `reported_at` | timestamp |
+
+Router rulesets do **not** use Manifold discovery; companion uses ruleset probe (same approach as
+pre-refactor hub code).
+
+### Install
+
+1. Manifold hub (`pico_mesh`) configured in HA.
+2. Add integration **Manifold Sensor Network** → select hub.
+3. Docker: mount companion in compose (see sensor-network README).
+
+### Still open (HA)
+
+| Item | Notes |
+|------|-------|
+| LSE01 / LSN50 / WL03A drivers | Add under `drivers/` |
+| Subentries / auto-provision | UX revisit — see hub MEMORY |
+| HA in CI | Not in harness yet |
+
+---
+
+## Still open / next steps (KRL / tests)
 
 | Item | Notes |
 |------|-------|
@@ -214,7 +268,8 @@ Root README documents Manifold services used and bootstrap flow (`sensor_network
 
 ## Related docs
 
-- [`README.md`](README.md) — Manifold integration, bootstrap flow, rulesets
+- [`README.md`](README.md) — Manifold integration, bootstrap flow, rulesets, **HA companion**
+- [`MEMORY.md` in manifold-home-assistant](../manifold-home-assistant/MEMORY.md) — hub + companion architecture
 - [`t/README.md`](t/README.md) — how to run tests, config, writing scenarios
 - [`../manifold-api/t/README.md`](../manifold-api/t/README.md) — shared flags, cleanup, parse gate
 - [`../manifold-api/MEMORY.md`](../manifold-api/MEMORY.md) — migration history, KRL conventions, manifold-api harness

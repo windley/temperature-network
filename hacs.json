@@ -1,0 +1,7 @@
+{
+  "name": "Manifold Sensor Network",
+  "render_readme": true,
+  "domains": ["pico_mesh_sensor_network"],
+  "homeassistant": "2024.1.0",
+  "iot_class": "Local Polling"
+}
